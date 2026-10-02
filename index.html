@@ -1,0 +1,2567 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Informe de Revisión Funcional</title>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1A2230;
+  --ink-soft:#4A5568;
+  --ink-faint:#8A94A6;
+  --line:#E4E8EE;
+  --paper:#FFFFFF;
+  --bg:#F3F5F8;
+  --accent:#2C4A6E;
+  --accent-soft:#EAF0F6;
+
+  --green-bg:#E7F5EC; --green-fg:#1F7A44; --green-bd:#BFE4CC;
+  --red-bg:#FBEBEA;   --red-fg:#B3372A;   --red-bd:#F1C6C1;
+  --orange-bg:#FCF0E2; --orange-fg:#B4600F; --orange-bd:#F3D6AC;
+  --gray-bg:#EEF0F3;  --gray-fg:#5B6472;  --gray-bd:#DADFE6;
+  --yellow-bg:#FBF3D6; --yellow-fg:#8A6D12; --yellow-bd:#EEDE9C;
+  --blue-bg:#E7EEF7;  --blue-fg:#2C4A6E;  --blue-bd:#C4D5E7;
+  --purple-bg:#EFE9F7; --purple-fg:#5B3E96; --purple-bd:#D5C7EC;
+  --teal-bg:#E3F4F2;  --teal-fg:#1D7A6E;  --teal-bd:#B9E1DB;
+}
+
+/* Each loaded "bloque" (source file) gets a stable color, cycling through
+   this palette in load order, so it's easy to visually tell which bloque
+   something belongs to wherever it appears (file chip, source-tag badges,
+   header) without having to read the label every time. */
+.src-color-0{ --src-bg:var(--blue-bg);   --src-fg:var(--blue-fg);   --src-bd:var(--blue-bd); }
+.src-color-1{ --src-bg:var(--green-bg);  --src-fg:var(--green-fg);  --src-bd:var(--green-bd); }
+.src-color-2{ --src-bg:var(--purple-bg); --src-fg:var(--purple-fg); --src-bd:var(--purple-bd); }
+.src-color-3{ --src-bg:var(--orange-bg); --src-fg:var(--orange-fg); --src-bd:var(--orange-bd); }
+.src-color-4{ --src-bg:var(--teal-bg);   --src-fg:var(--teal-fg);   --src-bd:var(--teal-bd); }
+.src-color-5{ --src-bg:var(--yellow-bg); --src-fg:var(--yellow-fg); --src-bd:var(--yellow-bd); }
+.src-color-6{ --src-bg:var(--gray-bg);   --src-fg:var(--gray-fg);   --src-bd:var(--gray-bd); }
+*{ margin:0; padding:0; box-sizing:border-box; }
+html,body{ background:var(--bg); }
+body{
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+  color:var(--ink);
+  line-height:1.6;
+  font-size:15px;
+}
+.wrap{ max-width:1080px; margin:0 auto; padding:28px 24px 80px; }
+
+h1,h2,h3,h4{ font-family:'Source Serif 4', Georgia, serif; font-weight:700; color:var(--ink); }
+
+a{ color:var(--accent); text-decoration:none; }
+a:hover{ text-decoration:underline; }
+
+code{ font-family:'SFMono-Regular',Consolas,Menlo,monospace; background:#EEF1F5; padding:1px 5px; border-radius:4px; font-size:0.88em; color:#3A4658; }
+
+/* ---------- UPLOAD ---------- */
+#upload-section{
+  background:var(--paper); border:1px solid var(--line); border-radius:12px;
+  padding:26px 28px; margin-bottom:20px;
+}
+#upload-section h1{ font-size:1.35rem; margin-bottom:4px; }
+#upload-section .sub{ color:var(--ink-faint); font-size:0.88rem; margin-bottom:18px; }
+.dropzone{
+  border:1.5px dashed #C6CDD8; border-radius:10px; padding:30px 20px; text-align:center;
+  cursor:pointer; transition:all .15s ease; color:var(--ink-soft);
+}
+.dropzone:hover, .dropzone.drag-over{ border-color:var(--accent); background:var(--accent-soft); }
+.dropzone .main{ font-weight:600; color:var(--ink); margin-bottom:4px; }
+.dropzone .hint{ font-size:0.82rem; color:var(--ink-faint); }
+input[type=file]{ display:none; }
+
+.files-loaded{ margin-top:16px; display:flex; flex-direction:column; gap:8px; }
+.file-chip{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  background:#F7F9FB; border:1px solid var(--line); border-radius:8px; padding:10px 14px; font-size:0.85rem;
+  border-left:4px solid var(--src-fg, var(--line));
+}
+.file-chip .info{ display:flex; flex-direction:column; gap:1px; }
+.file-chip .name{ font-weight:600; }
+.file-chip .bloque{ font-size:0.76rem; color:var(--ink-faint); }
+.file-chip .count{ font-size:0.76rem; color:var(--ink-faint); white-space:nowrap; }
+.file-chip .actions{ display:flex; align-items:center; gap:10px; }
+.file-chip button{
+  border:1px solid var(--line); background:var(--paper); border-radius:6px; padding:5px 10px;
+  cursor:pointer; font-size:0.78rem; color:var(--ink-soft);
+}
+.file-chip button:hover{ border-color:#C6CDD8; color:var(--red-fg); }
+
+.error-banner{
+  margin-top:16px; background:var(--red-bg); border:1px solid var(--red-bd); color:var(--red-fg);
+  padding:12px 16px; border-radius:8px; font-size:0.86rem; display:none;
+}
+.error-banner.visible{ display:block; }
+.error-banner div{ margin-bottom:4px; }
+.error-banner div:last-child{ margin-bottom:0; }
+.info-banner{
+  margin-top:16px; background:var(--blue-bg); border:1px solid var(--blue-bd); color:var(--blue-fg);
+  padding:12px 16px; border-radius:8px; font-size:0.86rem; display:none;
+}
+.info-banner.visible{ display:block; }
+.info-banner div{ margin-bottom:4px; }
+.info-banner div:last-child{ margin-bottom:0; }
+
+/* ---------- NAV ---------- */
+#report-nav{
+  position:sticky; top:0; z-index:50; background:rgba(255,255,255,0.96); backdrop-filter:blur(6px);
+  border:1px solid var(--line); border-radius:10px; padding:10px 16px; margin-bottom:20px;
+  display:none; gap:14px; align-items:center; flex-wrap:wrap; box-shadow:0 2px 10px rgba(20,30,50,0.04);
+}
+#report-nav.visible{ display:flex; }
+#report-nav a.nav-link{
+  font-size:0.82rem; font-weight:600; color:var(--ink-soft); padding:6px 10px; border-radius:6px;
+}
+#report-nav a.nav-link:hover{ background:var(--accent-soft); color:var(--accent); text-decoration:none; }
+#report-nav .nav-groups{ position:relative; }
+#report-nav .nav-groups-menu{
+  display:none; position:absolute; top:100%; left:0; margin-top:6px; background:var(--paper);
+  border:1px solid var(--line); border-radius:8px; box-shadow:0 6px 20px rgba(20,30,50,0.12);
+  min-width:280px; max-height:340px; overflow-y:auto; padding:6px; z-index:60;
+}
+#report-nav .nav-groups.open .nav-groups-menu{ display:block; }
+#report-nav .nav-groups-menu a{ display:block; padding:7px 10px; border-radius:6px; font-size:0.82rem; color:var(--ink-soft); }
+#report-nav .nav-groups-menu a:hover{ background:var(--accent-soft); text-decoration:none; }
+#nav-search{
+  margin-left:auto; border:1px solid var(--line); border-radius:7px; padding:6px 10px; font-size:0.82rem;
+  min-width:170px; font-family:inherit; outline:none;
+}
+#nav-search:focus{ border-color:var(--accent); }
+
+/* ---------- REPORT ---------- */
+#report{ display:none; }
+#report.visible{ display:block; }
+
+.panel{
+  background:var(--paper); border:1px solid var(--line); border-radius:12px;
+  padding:28px 30px; margin-bottom:22px;
+}
+.panel-title{
+  font-size:1.15rem; padding-bottom:12px; margin-bottom:18px; border-bottom:1px solid var(--line);
+  display:flex; align-items:center; gap:10px;
+}
+.dq-panel-details > summary.dq-panel-summary{
+  cursor:pointer; list-style:none;
+}
+.dq-panel-details > summary.dq-panel-summary::-webkit-details-marker{ display:none; }
+.dq-panel-details > summary.dq-panel-summary::before{ content:'▸ '; color:var(--ink-faint); }
+.dq-panel-details[open] > summary.dq-panel-summary::before{ content:'▾ '; }
+.dq-panel-count{ font-size:0.82rem; font-weight:600; color:var(--ink-faint); }
+.dq-panel-body{ padding-top:2px; }
+.info-tooltip{
+  display:inline-flex; align-items:center; justify-content:center;
+  width:17px; height:17px; border-radius:50%; border:1px solid var(--ink-faint);
+  color:var(--ink-faint); font-size:0.72rem; font-weight:700; cursor:help;
+  flex-shrink:0;
+}
+.info-tooltip:hover{ background:var(--blue-bg); border-color:var(--blue-fg); color:var(--blue-fg); }
+
+/* header metadata */
+#report-header .sources-list{ display:flex; flex-direction:column; gap:14px; }
+#report-header .source-row{ padding-bottom:12px; border-bottom:1px solid var(--line); }
+#report-header .source-row:last-child{ border-bottom:none; padding-bottom:0; }
+#report-header .bloque-title{ font-size:1.3rem; margin-bottom:6px; display:flex; align-items:center; gap:9px; }
+#report-header .meta-row{ display:flex; flex-wrap:wrap; gap:5px 24px; font-size:0.84rem; color:var(--ink-soft); }
+#report-header .meta-row b{ color:var(--ink); font-weight:600; }
+#report-header .combined-total{
+  margin-top:6px; padding-top:14px; border-top:1.5px solid var(--accent-soft);
+  font-size:0.95rem; color:var(--ink);
+}
+#report-header .combined-total b{ font-family:'Source Serif 4',serif; font-size:1.2rem; color:var(--accent); }
+
+
+/* high-level change summary */
+.change-summary-source{
+  border:1px solid var(--line); border-radius:10px; padding:18px 20px; background:#FAFBFC;
+  margin-bottom:16px; border-left:4px solid var(--src-fg, var(--line));
+}
+.change-summary-source:last-child{ margin-bottom:0; }
+.change-summary-title{ font-family:'Source Serif 4',Georgia,serif; font-size:1.08rem; font-weight:700; margin-bottom:7px; }
+.change-summary-intro{ font-size:0.9rem; color:var(--ink-soft); margin-bottom:14px; }
+.change-summary-section{ margin-top:15px; }
+.change-summary-section:first-of-type{ margin-top:0; }
+.change-summary-section-title{
+  font-size:0.78rem; font-weight:800; text-transform:uppercase; letter-spacing:0.45px;
+  color:var(--accent); margin-bottom:7px;
+}
+.change-summary-list{ margin:0; padding-left:20px; display:flex; flex-direction:column; gap:7px; }
+.change-summary-list li{ font-size:0.88rem; color:var(--ink); padding-left:2px; }
+.change-summary-list li strong{ font-weight:700; }
+.change-summary-note{
+  margin-top:16px; padding:10px 12px; border-left:3px solid var(--accent);
+  background:var(--accent-soft); color:var(--ink-soft); font-size:0.84rem; border-radius:0 7px 7px 0;
+}
+
+/* summary cards */
+.summary-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:14px; }
+.summary-card{
+  border:1px solid var(--line); border-radius:10px; padding:16px; text-align:center; background:#FAFBFC;
+}
+.summary-card .n{ font-size:1.7rem; font-weight:800; font-family:'Source Serif 4',serif; }
+.summary-card .l{ font-size:0.72rem; text-transform:uppercase; letter-spacing:0.5px; color:var(--ink-faint); font-weight:700; margin-top:2px; }
+.summary-card.total .n{ color:var(--accent); }
+.summary-warning{
+  margin-top:14px; font-size:0.82rem; color:var(--orange-fg); background:var(--orange-bg);
+  border:1px solid var(--orange-bd); border-radius:8px; padding:9px 12px;
+}
+
+/* decision questions */
+.dq-card{
+  border:1px solid var(--line); border-left:4px solid var(--accent); border-radius:8px;
+  padding:16px 18px; margin-bottom:14px; background:#FAFBFC;
+}
+.dq-card:last-child{ margin-bottom:0; }
+.dq-head{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:8px; }
+.dq-id{ font-weight:700; font-family:'SFMono-Regular',Consolas,monospace; font-size:0.85rem; color:var(--accent); }
+.dq-question{ color:var(--ink); margin-bottom:10px; font-weight:700; }
+.dq-question-missing{ color:var(--ink-faint); font-style:italic; background:#F7F9FB; border:1px dashed var(--line); border-radius:6px; padding:8px 12px; }
+.dq-meta{ font-size:0.8rem; color:var(--ink-faint); margin-bottom:6px; }
+.dq-ids{ display:flex; flex-wrap:wrap; gap:6px; }
+.dq-ids a{
+  font-family:'SFMono-Regular',Consolas,monospace; font-size:0.76rem; background:var(--accent-soft);
+  color:var(--accent); padding:3px 8px; border-radius:5px;
+}
+.dq-ids a:hover{ background:#DCE7F2; text-decoration:none; }
+
+.dq-impact{ margin-bottom:10px; background:#F7F9FB; border:1px solid var(--line); border-radius:8px; padding:12px 16px; }
+.dq-impact-label{ font-size:0.7rem; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; color:var(--ink-faint); margin-bottom:6px; }
+.dq-impact-list{ list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:4px; }
+.dq-impact-list li{ font-size:0.86rem; color:var(--ink); padding-left:14px; position:relative; }
+.dq-impact-list li::before{ content:'•'; position:absolute; left:0; color:var(--accent); font-weight:700; }
+
+.dq-toolbar{
+  display:none; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;
+  margin-bottom:16px; padding-bottom:14px; border-bottom:1px solid var(--line);
+}
+.dq-toolbar.visible{ display:flex; }
+#dq-answered-count{ font-size:0.84rem; color:var(--ink-soft); font-weight:600; }
+.dq-toolbar-actions{ display:flex; gap:8px; }
+.dq-toolbar-actions button{
+  border:1px solid var(--line); background:var(--paper); border-radius:7px; padding:7px 13px;
+  font-size:0.8rem; cursor:pointer; color:var(--accent); font-family:inherit; font-weight:600;
+}
+.dq-toolbar-actions button:hover{ border-color:var(--accent); background:var(--accent-soft); }
+
+.dq-answer-block{ margin-top:12px; padding-top:12px; border-top:1px dashed var(--line); }
+.dq-recorded-answer{
+  margin-top:12px; padding:12px 14px; border:1px solid var(--green-bd); border-radius:8px;
+  background:var(--paper);
+}
+.dq-recorded-answer .dq-answer-label{ margin-bottom:6px; color:var(--green-fg); }
+.dq-extra-comment{ margin-top:10px; }
+.dq-extra-comment > summary{
+  cursor:pointer; list-style:none; display:inline-flex; align-items:center; gap:6px;
+  font-size:0.8rem; font-weight:600; color:var(--accent);
+}
+.dq-extra-comment > summary::-webkit-details-marker{ display:none; }
+.dq-extra-comment > summary::before{ content:'＋'; font-weight:700; }
+.dq-extra-comment[open] > summary::before{ content:'−'; }
+.dq-extra-comment-body{ margin-top:8px; }
+.dq-answer-label{
+  display:block; font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.4px;
+  color:var(--ink-faint); margin-bottom:5px;
+}
+.dq-answer-textarea{
+  width:100%; min-height:72px; border:1px solid var(--line); border-radius:7px; padding:9px 11px;
+  font-family:inherit; font-size:0.86rem; resize:vertical; outline:none; background:var(--paper);
+}
+.dq-answer-textarea:focus{ border-color:var(--accent); }
+.dq-answer-footer{ display:flex; align-items:center; justify-content:space-between; margin-top:6px; flex-wrap:wrap; gap:6px; }
+.dq-resolved-label{ font-size:0.8rem; color:var(--ink-soft); display:flex; align-items:center; gap:6px; cursor:pointer; }
+.dq-save-state{ font-size:0.76rem; color:var(--ink-faint); font-style:italic; }
+.dq-card.dq-card-resolved{ border-left:4px solid var(--green-fg); background:var(--green-bg); }
+.dq-resolved-badge{
+  display:inline-block; font-size:0.72rem; font-weight:700; color:var(--green-fg);
+  background:var(--paper); border:1px solid var(--green-fg); border-radius:99px; padding:2px 9px; margin-left:6px;
+}
+#dq-list.hide-resolved .dq-card.dq-card-resolved{ display:none; }
+.clear-answer-btn{
+  border:none; background:none; color:var(--ink-faint); font-size:0.76rem; text-decoration:underline;
+  cursor:pointer; font-family:inherit; padding:0;
+}
+.clear-answer-btn:hover{ color:var(--red-fg); }
+
+.groups-toolbar{
+  display:none; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;
+  margin-bottom:16px; padding-bottom:14px; border-bottom:1px solid var(--line);
+}
+.groups-toolbar.visible{ display:flex; }
+#finding-notes-count{ font-size:0.84rem; color:var(--ink-soft); font-weight:600; }
+
+/* source tag: shown only when more than one JSON is loaded */
+.source-tag{
+  display:inline-flex; align-items:center; font-size:0.68rem; font-weight:700; text-transform:uppercase;
+  letter-spacing:0.4px; padding:3px 9px; border-radius:5px;
+  background:var(--src-bg, var(--purple-bg)); color:var(--src-fg, var(--purple-fg));
+  border:1px solid var(--src-bd, var(--purple-bd));
+}
+.src-dot{
+  display:inline-block; width:9px; height:9px; border-radius:50%;
+  background:var(--src-fg, var(--ink-faint)); flex-shrink:0;
+}
+
+/* filters */
+.filters-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(170px,1fr)); gap:10px; margin-bottom:12px; }
+.filters-grid label{ display:block; font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; color:var(--ink-faint); margin-bottom:4px; }
+.filters-grid select, .filters-grid input{
+  width:100%; border:1px solid var(--line); border-radius:7px; padding:7px 9px; font-size:0.84rem;
+  font-family:inherit; background:var(--paper); outline:none;
+}
+.filters-grid select:focus, .filters-grid input:focus{ border-color:var(--accent); }
+.filters-actions{ display:flex; justify-content:space-between; align-items:center; margin-top:6px; }
+#filters-count{ font-size:0.8rem; color:var(--ink-faint); }
+#clear-filters{
+  border:1px solid var(--line); background:var(--paper); border-radius:7px; padding:7px 14px;
+  font-size:0.82rem; cursor:pointer; color:var(--ink-soft); font-family:inherit;
+}
+#clear-filters:hover{ border-color:#C6CDD8; }
+
+/* groups */
+.group-block{ margin-bottom:30px; scroll-margin-top:70px; }
+.group-block:last-child{ margin-bottom:0; }
+.group-title{
+  font-size:1.05rem; margin-bottom:14px; padding-bottom:8px; border-bottom:2px solid var(--accent-soft);
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+}
+.group-title .count-pill{
+  font-family:'Inter',sans-serif; font-size:0.72rem; font-weight:700; color:var(--ink-faint);
+  background:var(--gray-bg); border-radius:10px; padding:2px 9px;
+}
+
+/* change card */
+.change{
+  border:1px solid var(--line); border-radius:10px; padding:18px 20px; margin-bottom:14px;
+  scroll-margin-top:70px; background:var(--paper); page-break-inside:avoid; break-inside:avoid;
+}
+.change:last-child{ margin-bottom:0; }
+.change.skip{ background:#FBFBFC; }
+.change.priority-high{ background:#FDF3F2; border-color:var(--red-bd); }
+.change-head{ display:flex; flex-wrap:wrap; align-items:center; gap:8px 10px; margin-bottom:6px; }
+.change-id{ font-family:'SFMono-Regular',Consolas,monospace; font-weight:700; font-size:0.85rem; color:var(--ink); }
+.change-concept{ font-weight:600; color:var(--ink); }
+.change-sub{ font-size:0.78rem; color:var(--ink-faint); margin-bottom:10px; }
+.location-block{ margin-bottom:12px; }
+.location-label{ font-size:0.7rem; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; color:var(--ink-faint); margin-bottom:3px; }
+.location-value{ font-size:0.95rem; font-weight:600; color:var(--ink); }
+.location-value .location-missing{ font-weight:500; font-style:italic; color:var(--ink-faint); }
+.badge-row{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; align-items:center; }
+.badge{
+  display:inline-flex; align-items:center; gap:4px; font-size:0.68rem; font-weight:700;
+  text-transform:uppercase; letter-spacing:0.4px; padding:3px 9px; border-radius:5px; border:1px solid transparent;
+}
+.badge-green{ background:var(--green-bg); color:var(--green-fg); border-color:var(--green-bd); }
+.badge-red{ background:var(--red-bg); color:var(--red-fg); border-color:var(--red-bd); }
+.badge-orange{ background:var(--orange-bg); color:var(--orange-fg); border-color:var(--orange-bd); }
+.badge-gray{ background:var(--gray-bg); color:var(--gray-fg); border-color:var(--gray-bd); }
+.badge-yellow{ background:var(--yellow-bg); color:var(--yellow-fg); border-color:var(--yellow-bd); }
+.badge-blue{ background:var(--blue-bg); color:var(--blue-fg); border-color:var(--blue-bd); }
+
+.compare{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:10px; }
+@media (max-width:640px){ .compare{ grid-template-columns:1fr; } }
+.compare .box{ border-radius:8px; padding:12px 14px; font-size:0.86rem; }
+.compare .box.actual{ background:#FBFBFC; border:1px solid var(--line); }
+.compare .box.proposed{ background:var(--green-bg); border:1px solid var(--green-bd); }
+.compare .box .lbl{ font-size:0.68rem; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px; }
+.compare .box.actual .lbl{ color:var(--ink-faint); }
+.compare .box.proposed .lbl{ color:var(--green-fg); }
+
+.block-box{ border-radius:8px; padding:12px 14px; font-size:0.86rem; margin-bottom:10px; }
+.block-box.actual{ background:#FBFBFC; border:1px solid var(--line); }
+.block-box.proposed{ background:var(--green-bg); border:1px solid var(--green-bd); margin-top:8px; }
+.finding-context-box{
+  background:var(--blue-bg); border:1px solid var(--blue-bd); border-radius:8px;
+  padding:12px 14px; font-size:0.86rem; margin-bottom:10px;
+}
+.finding-change-box{
+  background:var(--teal-bg); border:1px solid var(--teal-bd); border-radius:8px;
+  padding:12px 14px; font-size:0.86rem; margin-bottom:12px;
+}
+.finding-context-box .lbl,
+.finding-change-box .lbl{
+  font-size:0.68rem; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px;
+}
+.finding-context-box .lbl{ color:var(--blue-fg); }
+.finding-change-box .lbl{ color:var(--teal-fg); }
+.block-box .lbl{ font-size:0.68rem; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px; }
+.block-box.actual .lbl{ color:var(--ink-faint); }
+.block-box.proposed .lbl{ color:var(--green-fg); }
+
+.delete-flag{
+  display:inline-flex; align-items:center; gap:6px; font-size:0.78rem; font-weight:700;
+  color:var(--red-fg); background:var(--red-bg); border:1px solid var(--red-bd); border-radius:7px;
+  padding:5px 10px; margin-bottom:10px;
+}
+.manual-flag{
+  display:inline-flex; align-items:center; gap:6px; font-size:0.78rem; font-weight:700;
+  color:var(--orange-fg); background:var(--orange-bg); border:1px solid var(--orange-bd); border-radius:7px;
+  padding:5px 10px; margin-bottom:10px;
+}
+.skip-flag{
+  display:inline-flex; align-items:center; gap:6px; font-size:0.78rem; font-weight:600;
+  color:var(--ink-faint); margin-bottom:8px;
+}
+
+.field{ margin-bottom:8px; font-size:0.86rem; }
+.field .lbl{ font-weight:700; color:var(--ink-soft); font-size:0.75rem; text-transform:uppercase; letter-spacing:0.4px; margin-bottom:2px; }
+.field .val{ color:var(--ink); }
+.schema-example{
+  background:#F4F6F9; border:1px solid var(--line); border-radius:8px; padding:14px 16px;
+  font-size:0.78rem; line-height:1.5; overflow-x:auto; white-space:pre;
+  font-family:'SFMono-Regular',Consolas,monospace;
+}
+
+.dq-link{
+  display:block; margin-bottom:10px; background:var(--blue-bg);
+  color:var(--ink); border:1px solid var(--blue-bd); border-radius:8px; padding:10px 14px;
+}
+.dq-link-summary{ cursor:pointer; list-style:none; display:flex; align-items:baseline; gap:8px; }
+.dq-link-summary::-webkit-details-marker{ display:none; }
+.dq-link-summary::before{ content:'▸'; color:var(--blue-fg); font-size:0.7rem; }
+.dq-link[open] .dq-link-summary::before{ content:'▾'; }
+.dq-link-label{ font-size:0.68rem; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; color:var(--blue-fg); }
+.dq-link-id{ font-family:'SFMono-Regular',Consolas,monospace; font-weight:700; font-size:0.85rem; color:var(--blue-fg); }
+.dq-link-question{ font-size:0.86rem; color:var(--ink); line-height:1.5; font-weight:700; margin-top:8px; }
+.dq-link-body{ padding-top:2px; }
+.dq-link-jump{ display:inline-block; margin-top:8px; font-size:0.8rem; font-weight:600; color:var(--blue-fg); }
+.dq-link-jump:hover{ text-decoration:underline; }
+
+details.collapsible{ margin-top:10px; border:1px solid var(--line); border-radius:8px; background:#FAFBFC; }
+details.collapsible summary{
+  cursor:pointer; padding:9px 14px; font-size:0.8rem; font-weight:700; color:var(--ink-soft); list-style:none;
+}
+details.collapsible summary::-webkit-details-marker{ display:none; }
+details.collapsible summary::before{ content:'▸ '; color:var(--ink-faint); }
+details.collapsible[open] summary::before{ content:'▾ '; }
+details.collapsible .collapsible-body{ padding:0 14px 12px; font-size:0.84rem; }
+details.collapsible .field{ margin-bottom:6px; }
+details.detail-toggle{ background:var(--accent-soft); border-color:#DCE7F2; }
+details.detail-toggle summary{ color:var(--accent); }
+details.detail-toggle summary::before{ color:var(--accent); }
+
+.criteria-explainer{ margin-top:0; margin-bottom:18px; }
+.criteria-explainer summary{ font-size:0.86rem; }
+.criteria-block{ margin-bottom:14px; }
+.criteria-block:last-child{ margin-bottom:0; }
+.criteria-title{ font-weight:700; font-size:0.86rem; color:var(--ink); margin-bottom:6px; }
+.criteria-list{ list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:6px; }
+.criteria-list li{ font-size:0.84rem; color:var(--ink-soft); line-height:1.5; }
+.criteria-list li .badge{ margin-right:6px; vertical-align:middle; }
+.criteria-note{ font-size:0.84rem; color:var(--ink-soft); margin-top:6px; }
+
+/* markdown inside content */
+.md p{ margin-bottom:8px; }
+.md p:last-child{ margin-bottom:0; }
+.md ul{ margin:6px 0 6px 20px; }
+.md li{ margin-bottom:3px; }
+.md blockquote{ border-left:3px solid var(--line); padding-left:10px; color:var(--ink-soft); margin:6px 0; }
+.md table{ border-collapse:collapse; width:100%; margin:8px 0; font-size:0.85rem; }
+.md table th, .md table td{ border:1px solid var(--line); padding:6px 9px; text-align:left; }
+.md table th{ background:#F3F5F8; font-weight:700; }
+
+.hidden-by-filter{ display:none !important; }
+
+/* print */
+@media print{
+  body{ background:#fff; }
+  #upload-section, #schema-section, #report-nav, .filters-panel, #print-btn, .dq-toolbar{ display:none !important; }
+  .panel{ box-shadow:none; border:1px solid #ccc; break-inside:avoid; }
+  details.collapsible{ break-inside:avoid; }
+  .change{ break-inside:avoid; }
+  a{ color:inherit; text-decoration:none; }
+  @page{ size:A4; margin:16mm; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <section id="upload-section">
+    <h1>Informe de Revisión Funcional</h1>
+    <div class="sub" id="upload-sub">Cargá uno o más archivos JSON de revisión para generar el informe. Podés seguir agregando archivos más adelante: se suman al mismo informe, no lo reemplazan.</div>
+    <div class="dropzone" id="dropzone">
+      <div class="main" id="dropzone-main">Hacé clic para seleccionar uno o más archivos .json, o arrastralos aquí</div>
+      <div class="hint">Cada archivo debe respetar la estructura metadata / changes. Se pueden cargar varios a la vez o de a uno.</div>
+    </div>
+    <input type="file" id="file-input" accept="application/json,.json" multiple>
+    <div class="files-loaded" id="files-loaded"></div>
+    <div class="error-banner" id="error-banner"></div>
+    <div class="info-banner" id="info-banner"></div>
+  </section>
+
+  <section id="schema-section" class="panel">
+    <details class="dq-panel-details" id="schema-details">
+      <summary class="panel-title dq-panel-summary">
+        Estructura del JSON — guía para generar un archivo nuevo
+        <span class="info-tooltip" title="Referencia de los campos que este HTML puede interpretar, indicando cuáles son obligatorios y cuáles opcionales. Sirve para generar nuevos archivos de cambios con la estructura correcta o comprender la estructura de un archivo existente.">ⓘ</span>
+      </summary>
+      <div class="dq-panel-body" id="schema-body"></div>
+    </details>
+  </section>
+
+  <nav id="report-nav">
+    <a class="nav-link" href="#panel-summary">Totales</a>
+    <a class="nav-link" href="#panel-change-summary" id="nav-change-summary">Resumen de cambios</a>
+    <a class="nav-link" href="#panel-dq">Preguntas de decisión</a>
+    <div class="nav-groups" id="nav-groups">
+      <a class="nav-link" href="#" id="nav-groups-toggle">Grupos ▾</a>
+      <div class="nav-groups-menu" id="nav-groups-menu"></div>
+    </div>
+    <input type="text" id="nav-search" placeholder="Buscar por ID o término (ej. CLR-032, Legal Representative)">
+    <button id="print-btn" class="nav-link" style="border:1px solid var(--line);background:none;cursor:pointer;font-family:inherit;">Imprimir / PDF</button>
+  </nav>
+
+  <div id="report">
+    <section class="panel" id="report-header">
+      <div class="panel-title">Bloques cargados</div>
+      <div class="sources-list" id="sources-list"></div>
+    </section>
+
+    <section class="panel" id="panel-summary">
+      <details class="dq-panel-details" open>
+        <summary class="panel-title dq-panel-summary">Resumen</summary>
+        <div class="dq-panel-body">
+          <div class="summary-grid" id="summary-grid"></div>
+          <div class="summary-warning" id="summary-warning" style="display:none;"></div>
+        </div>
+      </details>
+    </section>
+
+    <section class="panel" id="panel-change-summary" style="display:none;">
+      <details class="dq-panel-details" open>
+        <summary class="panel-title dq-panel-summary">Resumen de cambios</summary>
+        <div class="dq-panel-body" id="change-summary-container"></div>
+      </details>
+    </section>
+
+    <section class="panel" id="panel-dq">
+      <details class="dq-panel-details">
+        <summary class="panel-title dq-panel-summary">
+          Preguntas de decisión
+          <span class="dq-panel-count" id="dq-panel-count"></span>
+          <span class="info-tooltip" title="Estas preguntas requieren un pequeño análisis, no son un cambio mecánico. Resolverlas define cómo tratar varios hallazgos relacionados (los marcados como revisión manual o sin cambios por ahora) — no son temas para dejar para después, sino decisiones que conviene tomar antes de aplicar los cambios.">ⓘ</span>
+        </summary>
+        <div class="dq-panel-body">
+          <div class="dq-toolbar" id="dq-toolbar">
+            <span id="dq-answered-count"></span>
+            <div class="dq-toolbar-actions">
+              <label class="dq-resolved-label" style="margin-right:6px;"><input type="checkbox" id="dq-hide-resolved-toggle"> Ocultar resueltas</label>
+              <button id="export-md-btn" type="button">Exportar respuestas (Markdown)</button>
+              <button id="export-json-btn" type="button">Exportar respuestas (JSON)</button>
+            </div>
+          </div>
+          <div id="dq-list"></div>
+          <div id="dq-empty" style="color:var(--ink-faint);font-size:0.86rem;display:none;">No hay preguntas de decisión registradas en los archivos cargados.</div>
+        </div>
+      </details>
+    </section>
+
+    <section class="panel filters-panel" id="panel-filters">
+      <div class="panel-title">Filtros</div>
+      <details class="collapsible criteria-explainer">
+        <summary>Cómo se clasifican los cambios (Action · Change Type · Priority · Needs Human Review)</summary>
+        <div class="collapsible-body">
+          <p style="margin-bottom:12px;">Son dos preguntas independientes, que no se deducen una de la otra.</p>
+
+          <div class="criteria-block">
+            <div class="criteria-title">Change Type — ¿cambia la regla de fondo, o solo el nombre?</div>
+            <ul class="criteria-list">
+              <li><span class="badge badge-red">critical</span> primera aparición del término nuevo en un lugar del que dependen otras lecturas (glosario, definición base). Máximo 2-3 por bloque.</li>
+              <li><span class="badge badge-gray">mechanical</span> reemplazo puramente nominal: el mecanismo es idéntico antes y después.</li>
+              <li><span class="badge badge-blue">conceptual</span> mismo mecanismo, pero se reformula el marco de la frase (se quita una jerarquía/condición que ya no aplica).</li>
+              <li><span class="badge badge-orange">pending</span> no se ejecuta: depende de una decisión de otro bloque o de validación legal.</li>
+            </ul>
+          </div>
+
+          <div class="criteria-block">
+            <div class="criteria-title">Review Priority — qué tan urgente es que un humano lo mire</div>
+            <ul class="criteria-list">
+              <li><span class="badge badge-red">high</span> autoridad legal/contractual (firma, revocación, indemnización, obligación estatutaria).</li>
+              <li><span class="badge badge-yellow">medium</span> acceso/permisos/visibilidad en el producto, una acción de único uso, o una equivalencia entre roles sin efecto legal directo.</li>
+              <li><span class="badge badge-gray">low</span> renombrado puro: ningún mecanismo ni consecuencia cambia.</li>
+            </ul>
+            <p class="criteria-note">Un cambio <code>critical</code> siempre se marca <code>high</code>, sin excepción.</p>
+          </div>
+
+          <div class="criteria-block">
+            <div class="criteria-title">Needs Human Review</div>
+            <p class="criteria-note"><code>true</code> si priority es medium/high, o si el cambio es critical. <code>false</code> solo si priority es low y change_type es mechanical.</p>
+          </div>
+
+          <div class="criteria-block">
+            <div class="criteria-title">Action</div>
+            <ul class="criteria-list">
+              <li><span class="badge badge-green">replace_exact / replace_block</span> el término representa exactamente lo que el contexto funcional define, sin agregar acceso, autoridad legal ni notificaciones no confirmadas.</li>
+              <li><span class="badge badge-orange">manual_review</span> mezcla la definición con una función operativa o legal no confirmada — incluso si el renombrado en sí sería seguro.</li>
+              <li><span class="badge badge-gray">skip</span> pertenece a otro modelo conceptual, es historial de versiones, o no corresponde al término.</li>
+              <li><span class="badge badge-red">delete</span> la definición o regla dejó de existir.</li>
+            </ul>
+          </div>
+        </div>
+      </details>
+      <div class="filters-grid" id="filters-grid"></div>
+      <div class="filters-actions">
+        <span id="filters-count"></span>
+        <button id="clear-filters">Limpiar filtros</button>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-groups">
+      <div class="panel-title">Hallazgos</div>
+      <div class="groups-toolbar" id="groups-toolbar">
+        <span id="finding-notes-count"></span>
+        <div class="dq-toolbar-actions">
+          <button id="export-notes-md-btn" type="button">Exportar comentarios (Markdown)</button>
+          <button id="export-notes-json-btn" type="button">Exportar comentarios (JSON)</button>
+        </div>
+      </div>
+      <div id="groups-container"></div>
+    </section>
+  </div>
+
+</div>
+
+<script>
+/* =========================================================
+   DATA LOADING
+   Multiple JSON files accumulate into SOURCES; nothing is
+   ever replaced by loading a new file, only added or removed
+   explicitly by the user.
+   ========================================================= */
+let SOURCES = [];      // [{ sourceId, fileName, metadata, changes }]
+let sourceCounter = 0;
+
+function readFileAsText(file){
+  return new Promise(function(resolve, reject){
+    const reader = new FileReader();
+    reader.onload = function(e){ resolve(e.target.result); };
+    reader.onerror = function(){ reject(new Error('No se pudo leer el archivo ' + file.name + '.')); };
+    reader.readAsText(file, 'utf-8');
+  });
+}
+
+async function handleFiles(fileList){
+  const files = Array.from(fileList || []);
+  if(!files.length) return;
+  const errors = [];
+  const replacedLabels = [];
+  for(const file of files){
+    let text;
+    try{
+      text = await readFileAsText(file);
+    }catch(err){
+      errors.push(file.name + ': no se pudo leer el archivo.');
+      continue;
+    }
+    let parsed;
+    try{
+      parsed = JSON.parse(text);
+    }catch(err){
+      errors.push(file.name + ': el archivo no tiene el formato esperado para una revisión funcional (JSON inválido).');
+      continue;
+    }
+    if(Array.isArray(parsed && parsed.decision_questions) && !Array.isArray(parsed.changes)){
+      errors.push(file.name + ': este archivo es una EXPORTACIÓN de respuestas generada por el propio visor ("Exportar respuestas (JSON)"), no un archivo de cambios. No es necesario volver a cargarlo: las respuestas ya quedan guardadas en este navegador y asociadas al bloque. El archivo exportado puede utilizarse para compartir o conservar esas respuestas, pero no debe cargarse nuevamente como archivo de revisión.');
+      continue;
+    }
+    const problem = validateReviewJSON(parsed);
+    if(problem){
+      errors.push(file.name + ': ' + problem);
+      continue;
+    }
+    const normalized = normalizeReviewData(parsed);
+    const label = normalized.metadata.bloque || file.name;
+
+    // If a file with this same "bloque" is already loaded, treat this as an
+    // updated version of it and replace it — rather than silently piling up
+    // a duplicate, which is what made corrected JSONs look like "nothing
+    // changed" (the old, already-loaded copy was still the one showing).
+    const existingIdx = SOURCES.findIndex(function(s){
+      return (s.metadata.bloque || s.fileName) === label;
+    });
+    if(existingIdx !== -1){
+      SOURCES.splice(existingIdx, 1);
+      replacedLabels.push(label);
+    }
+
+    sourceCounter++;
+    SOURCES.push({
+      sourceId: 's' + sourceCounter,
+      fileName: file.name,
+      metadata: normalized.metadata,
+      changes: normalized.changes
+    });
+  }
+  if(replacedLabels.length){
+    showInfo(replacedLabels.map(function(l){ return 'Se reemplazó la versión anterior de "' + l + '" por la que acabás de cargar.'; }));
+  }else{
+    hideInfo();
+  }
+  if(errors.length){
+    showError(errors);
+  }else{
+    hideError();
+  }
+  document.getElementById('file-input').value = '';
+  rebuildReport();
+}
+
+function removeSource(sourceId){
+  SOURCES = SOURCES.filter(function(s){ return s.sourceId !== sourceId; });
+  rebuildReport();
+}
+
+/* =========================================================
+   VALIDATION
+   ========================================================= */
+function validateReviewJSON(data){
+  if(!data || typeof data !== 'object'){
+    return 'el archivo no tiene el formato esperado para una revisión funcional.';
+  }
+  if(!data.metadata || typeof data.metadata !== 'object'){
+    return 'el archivo no tiene el formato esperado para una revisión funcional (falta "metadata").';
+  }
+  if(!Array.isArray(data.changes)){
+    return 'el archivo no tiene el formato esperado para una revisión funcional (falta "changes").';
+  }
+  return null;
+}
+
+function showError(messages){
+  const el = document.getElementById('error-banner');
+  el.innerHTML = messages.map(function(m){ return '<div>' + escapeHtml(m) + '</div>'; }).join('');
+  el.classList.add('visible');
+}
+function hideError(){
+  const el = document.getElementById('error-banner');
+  el.classList.remove('visible');
+  el.innerHTML = '';
+}
+function showInfo(messages){
+  const el = document.getElementById('info-banner');
+  if(!el) return;
+  el.innerHTML = messages.map(function(m){ return '<div>' + escapeHtml(m) + '</div>'; }).join('');
+  el.classList.add('visible');
+}
+function hideInfo(){
+  const el = document.getElementById('info-banner');
+  if(!el) return;
+  el.classList.remove('visible');
+  el.innerHTML = '';
+}
+
+/* =========================================================
+   NORMALIZATION (per file — never mixes files at this stage)
+   ========================================================= */
+function nz(v){ return (v === undefined) ? null : v; }
+
+function normalizeReviewData(raw){
+  const meta = raw.metadata || {};
+  const changes = (raw.changes || []).map(function(c){
+    return {
+      id: nz(c.id),
+      concept: nz(c.concept),
+      section: nz(c.section),
+      md_line: nz(c.md_line),
+      current_text: nz(c.current_text),
+      action: nz(c.action),
+      replacement_text: nz(c.replacement_text),
+      contexto_hallazgo: nz(c.contexto_hallazgo),
+      resumen_cambio: nz(c.resumen_cambio),
+      reason: nz(c.reason),
+      antecedente: nz(c.antecedente),
+      que_se_conserva: nz(c.que_se_conserva),
+      impacto_o_tema_relacionado: nz(c.impacto_o_tema_relacionado),
+      estado: nz(c.estado),
+      bloque_diferido: nz(c.bloque_diferido),
+      decision_source: nz(c.decision_source),
+      change_type: nz(c.change_type),
+      review_priority: nz(c.review_priority),
+      needs_human_review: (c.needs_human_review === true),
+      review_note: nz(c.review_note),
+      review_group_id: nz(c.review_group_id),
+      review_group_title: nz(c.review_group_title),
+      decision_question_id: nz(c.decision_question_id),
+      // Optional traceability fields, seen in consolidated files that merge
+      // several earlier batches into one. Not required, but preserved
+      // rather than silently dropped when present.
+      source_file: nz(c.source_file),
+      source_stage: nz(c.source_stage),
+      subblock_origen: nz(c.subblock_origen),
+      estado_origen: nz(c.estado_origen),
+      final_master_status: nz(c.final_master_status),
+      final_master_match: nz(c.final_master_match)
+    };
+  });
+  return {
+    metadata: {
+      bloque: nz(meta.bloque),
+      orden: nz(meta.orden),
+      functional_source: nz(meta.functional_source),
+      master_base: nz(meta.master_base),
+      total_changes: nz(meta.total_changes),
+      resumen_acciones: meta.resumen_acciones || {},
+      decision_questions_summary: meta.decision_questions_summary || {},
+      // Optional traceability fields at the metadata level (see the
+      // "campos de trazabilidad" table in the schema reference panel).
+      // Preserved but not all of them are rendered yet.
+      generated_at: nz(meta.generated_at),
+      purpose: nz(meta.purpose),
+      source_manifest: nz(meta.source_manifest),
+      batches_originales_no_duplicados: nz(meta.batches_originales_no_duplicados),
+      decision_questions_count: nz(meta.decision_questions),
+      estado_final_resumen: nz(meta.estado_final_resumen),
+      final_master_checks: nz(meta.final_master_checks),
+      final_master_checks_body: nz(meta.final_master_checks_body),
+      final_master_note: nz(meta.final_master_note),
+      consolidation_note: nz(meta.consolidation_note),
+      change_summary: nz(meta.change_summary)
+    },
+    changes: changes
+  };
+}
+
+/* =========================================================
+   DERIVED METRICS
+   Combine all loaded SOURCES into one view. Every change and
+   every decision question keeps a reference back to its
+   originating source, so nothing from different files is
+   silently conflated.
+   ========================================================= */
+function buildCombinedView(sources){
+  const changes = [];
+  const dqEntries = [];
+  const dqIndex = {};
+
+  sources.forEach(function(src){
+    const label = src.metadata.bloque || src.fileName;
+
+    // Map id -> section within this source only, so a Decision Question's
+    // "affected sections" (and the related-pending question lookup) never
+    // cross into another file's ids.
+    const idToSection = {};
+    src.changes.forEach(function(c){ idToSection[c.id] = c.section; });
+
+    src.changes.forEach(function(c){
+      changes.push(Object.assign({}, c, {
+        _sourceId: src.sourceId,
+        _sourceLabel: label,
+        _anchorId: 'change-' + cssSafe(src.sourceId) + '__' + cssSafe(c.id)
+      }));
+    });
+
+    const dqSummary = src.metadata.decision_questions_summary || {};
+    Object.keys(dqSummary).forEach(function(dqId){
+      const dq = dqSummary[dqId] || {};
+
+      // Compatibility layer: different batches of this JSON have used
+      // different field names for the same information (question/pregunta,
+      // affected_ids/findings). Read whichever is present — never invent a
+      // value, never require the JSON to be rewritten to one shape.
+      const rawQuestion = dq.question || dq.pregunta || null;
+      const rawStatus = dq.status || null; // no synonym: if absent, it's simply not tracked in this file.
+      const rawSubBloque = dq.bloque || null; // e.g. "Access", "Lease" — a sub-topic label, not a resolution status.
+      const affectedIds = Array.isArray(dq.affected_ids) ? dq.affected_ids
+                         : (Array.isArray(dq.findings) ? dq.findings : []);
+
+      // Derive affected sections purely from changes[].section — never
+      // stored or invented, always recomputed from the JSON that's already
+      // there, with duplicates removed and order of first appearance kept.
+      const affectedSections = [];
+      const seenSections = new Set();
+      affectedIds.forEach(function(id){
+        const sec = idToSection[id];
+        if(sec && !seenSections.has(sec)){
+          seenSections.add(sec);
+          affectedSections.push(sec);
+        }
+      });
+
+      const entry = {
+        dqId: dqId,
+        question: rawQuestion,
+        status: rawStatus,
+        answer: dq.answer || dq.respuesta || '',
+        subBloque: rawSubBloque,
+        affected_ids: affectedIds,
+        affectedSections: affectedSections,
+        _sourceId: src.sourceId,
+        _sourceLabel: label,
+        _anchorId: 'dq-' + cssSafe(src.sourceId) + '__' + cssSafe(dqId)
+      };
+      dqEntries.push(entry);
+      dqIndex[src.sourceId + '::' + dqId] = entry;
+    });
+  });
+
+  return { changes: changes, dqEntries: dqEntries, dqIndex: dqIndex };
+}
+
+function changeAnchorFor(sourceId, rawId){
+  return 'change-' + cssSafe(sourceId) + '__' + cssSafe(rawId);
+}
+function dqAnchorFor(sourceId, dqId){
+  return 'dq-' + cssSafe(sourceId) + '__' + cssSafe(dqId);
+}
+
+function computeActionCounts(changes){
+  const counts = {};
+  changes.forEach(function(c){
+    const key = c.action || '(sin action)';
+    counts[key] = (counts[key] || 0) + 1;
+  });
+  return counts;
+}
+
+function buildGroups(changes){
+  // grouped per source + review_group_id, so two files that happen to reuse
+  // the same group id never get merged into one visual group.
+  const order = [];
+  const map = {};
+  changes.forEach(function(c){
+    const gid = c.review_group_id;
+    const key = c._sourceId + '::' + (gid === null ? '__OTHERS__' : gid);
+    if(!map[key]){
+      map[key] = {
+        key: key,
+        title: (gid === null) ? 'Otros hallazgos' : (c.review_group_title || gid),
+        sourceLabel: c._sourceLabel,
+        sourceId: c._sourceId,
+        items: []
+      };
+      order.push(key);
+    }
+    map[key].items.push(c);
+  });
+  const groups = order.map(function(k){ return map[k]; });
+  // within each source, push its "Otros hallazgos" group to the end of that source's groups
+  groups.sort(function(a, b){
+    const aOthers = a.key.endsWith('__OTHERS__') ? 1 : 0;
+    const bOthers = b.key.endsWith('__OTHERS__') ? 1 : 0;
+    if(aOthers !== bOthers) return aOthers - bOthers;
+    return 0; // stable: keep original relative order otherwise
+  });
+  return groups;
+}
+
+function distinctValues(changes, field){
+  const set = new Set();
+  changes.forEach(function(c){
+    const v = c[field];
+    if(v !== null && v !== undefined && v !== '') set.add(v);
+  });
+  return Array.from(set).sort(function(a,b){ return String(a).localeCompare(String(b)); });
+}
+
+/* =========================================================
+   FILTERS
+   ========================================================= */
+// Opinionated first-look default: on the very first load, surface what
+// most needs a human's eyes (high-priority items pending manual review)
+// instead of showing everything at once. The person can clear it any time
+// with "Limpiar filtros", which resets to no filters at all (see below).
+const DEFAULT_FILTERS = {
+  action: '', priority: '', change_type: '', concept: '',
+  review_group: '', needs_human_review: '', decision_question: '', source: '', text: ''
+};
+let ACTIVE_FILTERS = {
+  action: '', priority: '', change_type: '', concept: '',
+  review_group: '', needs_human_review: '', decision_question: '', source: '', text: ''
+};
+let filtersInitialized = false;
+
+function matchesFilters(c){
+  if(ACTIVE_FILTERS.action && c.action !== ACTIVE_FILTERS.action) return false;
+  if(ACTIVE_FILTERS.priority && c.review_priority !== ACTIVE_FILTERS.priority) return false;
+  if(ACTIVE_FILTERS.change_type && c.change_type !== ACTIVE_FILTERS.change_type) return false;
+  if(ACTIVE_FILTERS.concept && c.concept !== ACTIVE_FILTERS.concept) return false;
+  if(ACTIVE_FILTERS.review_group){
+    const gid = c._sourceId + '::' + (c.review_group_id === null ? '__OTHERS__' : c.review_group_id);
+    if(gid !== ACTIVE_FILTERS.review_group) return false;
+  }
+  if(ACTIVE_FILTERS.needs_human_review === 'yes' && !c.needs_human_review) return false;
+  if(ACTIVE_FILTERS.needs_human_review === 'no' && c.needs_human_review) return false;
+  if(ACTIVE_FILTERS.decision_question && c.decision_question_id !== ACTIVE_FILTERS.decision_question) return false;
+  if(ACTIVE_FILTERS.source && c._sourceId !== ACTIVE_FILTERS.source) return false;
+  if(ACTIVE_FILTERS.text){
+    const needle = ACTIVE_FILTERS.text.toLowerCase();
+    const haystack = [
+      c.id, c.concept, c.section,
+      c.contexto_hallazgo, c.resumen_cambio,
+      c.current_text, c.replacement_text, c.reason
+    ].filter(Boolean).join(' ').toLowerCase();
+    if(haystack.indexOf(needle) === -1) return false;
+  }
+  return true;
+}
+
+function applyFilters(){
+  const combined = buildCombinedView(SOURCES);
+  if(!combined.changes.length) return;
+  let visibleCount = 0;
+  combined.changes.forEach(function(c){
+    const el = document.getElementById(c._anchorId);
+    if(!el) return;
+    const show = matchesFilters(c);
+    el.classList.toggle('hidden-by-filter', !show);
+    if(show) visibleCount++;
+  });
+  document.querySelectorAll('.group-block').forEach(function(gEl){
+    const anyVisible = gEl.querySelectorAll('.change:not(.hidden-by-filter)').length > 0;
+    gEl.classList.toggle('hidden-by-filter', !anyVisible);
+  });
+  document.getElementById('filters-count').textContent = visibleCount + ' de ' + combined.changes.length + ' hallazgos visibles';
+}
+
+function resetFilters(){
+  ACTIVE_FILTERS = {
+    action: '', priority: '', change_type: '', concept: '',
+    review_group: '', needs_human_review: '', decision_question: '', source: '', text: ''
+  };
+  document.querySelectorAll('#filters-grid select').forEach(function(s){ s.value = ''; });
+  document.querySelectorAll('#filters-grid input[type=text]').forEach(function(i){ i.value = ''; });
+  const navSearch = document.getElementById('nav-search');
+  if(navSearch) navSearch.value = '';
+  applyFilters();
+}
+
+/* =========================================================
+   RENDER HELPERS
+   ========================================================= */
+function escapeHtml(str){
+  if(str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
+}
+
+function cssSafe(id){
+  return String(id).replace(/[^a-zA-Z0-9_-]/g, '_');
+}
+
+// Assigns each loaded source (bloque) a stable color, cycling through the
+// src-color-0..6 palette in load order. Recomputed from the current SOURCES
+// array on every call, so it stays consistent across all the places a
+// bloque is labeled (file chip, header, source-tag badges) without needing
+// to persist an assignment anywhere.
+const SOURCE_COLOR_COUNT = 7;
+function sourceColorClass(sourceId){
+  const idx = SOURCES.findIndex(function(s){ return s.sourceId === sourceId; });
+  if(idx === -1) return '';
+  return 'src-color-' + (idx % SOURCE_COLOR_COUNT);
+}
+
+// Minimal, safe markdown-subset renderer: escapes first, then applies a
+// controlled set of transformations. No raw HTML from source is ever trusted.
+function renderMarkdown(raw){
+  if(raw === null || raw === undefined || raw === '') return '';
+  const text = String(raw).replace(/\r\n/g, '\n');
+  const lines = text.split('\n');
+  let html = '';
+  let i = 0;
+  let listOpen = false;
+  let paraBuf = [];
+
+  function flushPara(){
+    if(paraBuf.length){
+      html += '<p>' + inline(paraBuf.join(' ')) + '</p>';
+      paraBuf = [];
+    }
+  }
+  function closeList(){
+    if(listOpen){ html += '</ul>'; listOpen = false; }
+  }
+  function inline(s){
+    let out = escapeHtml(s);
+    out = out.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    out = out.replace(/`([^`]+?)`/g, '<code>$1</code>');
+    return out;
+  }
+
+  while(i < lines.length){
+    const line = lines[i];
+    const trimmed = line.trim();
+
+    if(/^\|.*\|$/.test(trimmed)){
+      flushPara(); closeList();
+      const tableLines = [];
+      while(i < lines.length && /^\|.*\|$/.test(lines[i].trim())){
+        tableLines.push(lines[i].trim());
+        i++;
+      }
+      html += renderMarkdownTable(tableLines);
+      continue;
+    }
+
+    if(trimmed === ''){
+      flushPara(); closeList();
+      i++; continue;
+    }
+
+    if(/^>\s?/.test(trimmed)){
+      flushPara(); closeList();
+      html += '<blockquote>' + inline(trimmed.replace(/^>\s?/, '')) + '</blockquote>';
+      i++; continue;
+    }
+
+    if(/^[-*]\s+/.test(trimmed)){
+      flushPara();
+      if(!listOpen){ html += '<ul>'; listOpen = true; }
+      html += '<li>' + inline(trimmed.replace(/^[-*]\s+/, '')) + '</li>';
+      i++; continue;
+    }
+
+    closeList();
+    paraBuf.push(trimmed);
+    i++;
+  }
+  flushPara(); closeList();
+  return '<div class="md">' + html + '</div>';
+}
+
+function renderMarkdownTable(tableLines){
+  const rows = tableLines
+    .filter(function(l){ return !/^\|[\s:|-]+\|$/.test(l); })
+    .map(function(l){
+      return l.replace(/^\||\|$/g, '').split('|').map(function(cell){ return cell.trim(); });
+    });
+  if(!rows.length) return '';
+  let out = '<table>';
+  rows.forEach(function(cells, idx){
+    const tag = (idx === 0) ? 'th' : 'td';
+    out += '<tr>' + cells.map(function(cell){
+      return '<' + tag + '>' + escapeHtml(cell).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/`([^`]+?)`/g,'<code>$1</code>') + '</' + tag + '>';
+    }).join('') + '</tr>';
+  });
+  out += '</table>';
+  return out;
+}
+
+function renderBadge(text, colorClass){
+  return '<span class="badge badge-' + colorClass + '">' + escapeHtml(text) + '</span>';
+}
+
+/* =========================================================
+   SCHEMA REFERENCE
+   Static documentation of the JSON structure this HTML reads,
+   built from the fields actually used by normalizeReviewData()
+   plus the traceability fields seen in the most recent
+   consolidated example file. Doesn't depend on any file being
+   loaded — rendered once on page load.
+   ========================================================= */
+const SCHEMA_DOC_MD =
+"Un archivo es un único objeto JSON con dos claves de primer nivel: `metadata` (datos generales del bloque) y `changes` (un array, un objeto por cada hallazgo o cambio propuesto).\n" +
+"\n" +
+"**1. Campos de `metadata` que el HTML usa activamente**\n" +
+"\n" +
+"| Campo | Obligatorio | Qué es |\n" +
+"|---|---|---|\n" +
+"| `bloque` | Sí | Nombre del bloque. Se usa como identificador: al cargar un archivo con el mismo `bloque` que uno ya cargado, el HTML lo reemplaza automáticamente en vez de sumarlo. |\n" +
+"| `orden` | No | Orden sugerido de este bloque dentro de la secuencia de trabajo. |\n" +
+"| `functional_source` | No | De qué documento funcional sale este bloque. |\n" +
+"| `master_base` | No | Versión del Documento Maestro contra la que se hizo la revisión. |\n" +
+"| `total_changes` | No | Cantidad total de cambios informada por quien generó el archivo. El HTML calcula el total real por su cuenta; esto es solo referencia. |\n" +
+"| `resumen_acciones` | No | Mapa plano acción → cantidad, por ejemplo accion replace_exact con valor 164. Tiene que ser un objeto plano de acción a número, nunca anidado. |\n" +
+"| `decision_questions_summary` | No | Objeto con una entrada por cada pregunta de decisión. La clave es el ID de la pregunta, por ejemplo DQ-LEASE-TIPO. Ver la tabla dedicada más abajo. |\n" +
+"| `change_summary` | No | Resumen ejecutivo legible de lo que cambia en el bloque. Puede incluir `title`, `intro`, `sections` (cada sección con `title` y `bullets`) y `note`. Los bullets pueden ser texto simple o un objeto con `title` y `text`. El HTML lo muestra en una sección propia antes del detalle de hallazgos. |\n" +
+"\n" +
+"**2. Campos de `metadata` de trazabilidad, opcionales**\n" +
+"\n" +
+"No son obligatorios. El HTML los conserva sin perderlos si están presentes, pero hoy solo muestra en pantalla `purpose` y `generated_at` en el encabezado; el resto queda disponible para quien abra el JSON directamente.\n" +
+"\n" +
+"| Campo | Qué es |\n" +
+"|---|---|\n" +
+"| `generated_at` | Fecha de generación del archivo. |\n" +
+"| `purpose` | Para qué se armó este archivo puntual, por ejemplo si es un consolidado final que no debe usarse para reaplicar cambios. |\n" +
+"| `source_manifest` | Lista de los archivos originales que se consolidaron, con cuántos cambios aportó cada uno. |\n" +
+"| `batches_originales_no_duplicados` | Nota sobre qué archivos ya están contenidos en este consolidado y no deben volver a sumarse aparte. |\n" +
+"| `decision_questions` | Resumen numérico de preguntas: pendientes, resueltas, total. Distinto de `decision_questions_summary`, que es el detalle pregunta por pregunta. |\n" +
+"| `estado_final_resumen` | Conteo de cuántos hallazgos quedaron en cada estado final descriptivo. |\n" +
+"| `final_master_checks` | Verificaciones numéricas de consistencia contra el Maestro final. |\n" +
+"| `final_master_checks_body` | Conteos de apariciones de ciertos términos en el cuerpo del Maestro final. |\n" +
+"| `final_master_note` | Nota explicando alguna decisión terminológica tomada en la consolidación final. |\n" +
+"| `consolidation_note` | Nota sobre qué se consolidó y por qué. |\n" +
+"\n" +
+"**3. Cada entrada de `decision_questions_summary`**\n" +
+"\n" +
+"| Campo | Obligatorio | Qué es |\n" +
+"|---|---|---|\n" +
+"| `question` | Sí, si la pregunta existe | El texto completo de la pregunta. |\n" +
+"| `status` | No | pending, resolved o closed. Si no está, el HTML la trata como pendiente. |\n" +
+"| `affected_ids` | No | Lista de ids de `changes` que dependen de esta pregunta. |\n" +
+"| `bloque` | No | Sub-bloque temático dentro del bloque general, por ejemplo Lease. |\n" +
+"| `answer` | No | La respuesta ya definida, si la pregunta fue resuelta en una revisión anterior. |\n" +
+"| `resolved_at` | No | Fecha en que se resolvió. |\n" +
+"| `source_stage` | No | En qué etapa o lote se originó o se resolvió esta pregunta. |\n" +
+"\n" +
+"**4. Campos de cada objeto dentro de `changes[]`, núcleo**\n" +
+"\n" +
+"| Campo | Obligatorio | Qué es |\n" +
+"|---|---|---|\n" +
+"| `id` | Sí | Identificador único del hallazgo dentro del bloque, por ejemplo B1-1.1. |\n" +
+"| `action` | Sí | Uno de: replace_exact, replace_block, manual_review, skip, delete. |\n" +
+"| `section` | No | Ubicación en el Documento Maestro. Es lo que el HTML muestra como ubicación principal de cada hallazgo. |\n" +
+"| `concept` | No | Concepto o término en juego. |\n" +
+"| `md_line` | No | Número de línea de referencia en el markdown del Maestro. Solo aparece como referencia técnica secundaria, nunca como ubicación principal. |\n" +
+"| `contexto_hallazgo` | No | Explica en qué contexto aparece el hallazgo y qué función cumple esa parte del Maestro antes de comparar textos. |\n" +
+"| `resumen_cambio` | No | Explica en lenguaje simple qué se propone cambiar y en qué sentido, sin repetir literalmente el replacement_text. El HTML lo muestra como “Qué se cambia”. |\n" +
+"| `current_text` | Depende de la acción | Texto actual en el Maestro, tal cual está hoy. |\n" +
+"| `replacement_text` | Depende de la acción | Texto propuesto para reemplazar. Vacío en skip y delete. |\n" +
+"| `reason` | No | Motivo del cambio. |\n" +
+"| `antecedente` | No | Puede ser texto libre en un párrafo narrativo, o un objeto con introduced_in_version, introduced_context, original_rationale y source. El HTML acepta las dos formas. |\n" +
+"| `que_se_conserva` | No | Qué parte del texto original se mantiene sin tocar. |\n" +
+"| `impacto_o_tema_relacionado` | No | Tema relacionado o impacto cruzado con otras secciones. |\n" +
+"| `estado` | No | Estado descriptivo libre, por ejemplo Aplicado o Pendiente de validación legal. |\n" +
+"| `bloque_diferido` | No | Si este hallazgo se difiere a otro bloque, el nombre de ese bloque. |\n" +
+"| `decision_source` | No | De dónde sale la decisión, por ejemplo review. |\n" +
+"| `change_type` | No | mechanical, conceptual, critical o pending son los cuatro valores del criterio de clasificación original. En archivos consolidados recientes también aparecieron technical, legal, documentation y editorial. |\n" +
+"| `review_priority` | No | high, medium o low. |\n" +
+"| `needs_human_review` | No | true o false. |\n" +
+"| `review_note` | No | Nota de quien revisó, explicando el criterio aplicado. |\n" +
+"| `review_group_id` / `review_group_title` | No | Agrupan hallazgos relacionados en la vista de Hallazgos. |\n" +
+"| `decision_question_id` | No | Si este hallazgo depende de una pregunta de decisión, el ID de esa pregunta. Tiene que existir como clave en decision_questions_summary para que se pueda enlazar. |\n" +
+"\n" +
+"**5. Campos de trazabilidad opcionales en `changes[]`**\n" +
+"\n" +
+"Igual que en metadata, no son obligatorios. El HTML preserva todos, pero por ahora solo `source_file` y `final_master_status` se muestran dentro del detalle secundario de cada hallazgo, en Ver motivo y detalle.\n" +
+"\n" +
+"| Campo | Qué es |\n" +
+"|---|---|\n" +
+"| `source_file` | De qué archivo original vino este hallazgo antes de consolidarse. |\n" +
+"| `source_stage` | En qué etapa del proceso se originó. |\n" +
+"| `subblock_origen` | Sub-bloque de origen, por ejemplo Owner o Tenant. |\n" +
+"| `estado_origen` | Estado que tenía este hallazgo en una revisión anterior, antes del estado final. |\n" +
+"| `final_master_status` | Estado final de este hallazgo contra el Maestro final. |\n" +
+"| `final_master_match` | Objeto con conteos de ocurrencias del texto actual y propuesto encontradas en el Maestro final, para verificar si el cambio quedó aplicado. |\n" +
+"\n" +
+"**6. Notas para generar un archivo nuevo**\n" +
+"\n" +
+"- No inventar valores para `action`, `change_type` ni `review_priority` fuera de los listados arriba.\n" +
+"- `resumen_acciones` tiene que ser un mapa plano de acción a número entero, nunca un objeto anidado, o el HTML lo va a mostrar mal.\n" +
+"- Cada `id` de `changes[]` tiene que ser único dentro del archivo.\n" +
+"- Si un hallazgo depende de una pregunta de decisión, el `decision_question_id` tiene que apuntar a una clave real dentro de `decision_questions_summary` en ese mismo archivo.\n" +
+"- Para revisiones funcionales nuevas conviene completar `contexto_hallazgo` y `resumen_cambio`: el primero ubica al lector y el segundo explica el cambio antes de mostrar Actual / Propuesto.\n" +
+"- Esta guía se armó a partir del criterio de clasificación acordado más el archivo consolidado más reciente. Si aparece un campo nuevo en un archivo futuro que no está listado acá, hay que sumarlo a esta referencia para que no se pierda.";
+
+function renderSchemaDoc(){
+  const el = document.getElementById('schema-body');
+  if(!el) return;
+  const example = {
+    metadata: {
+      bloque: "Bloque X — Nombre del bloque",
+      orden: 1,
+      functional_source: "Documento funcional de origen",
+      master_base: "Maestro_v7.16.md",
+      total_changes: 2,
+      resumen_acciones: { replace_exact: 1, manual_review: 1 },
+      change_summary: {
+        title: "Resumen de cambios",
+        intro: "Qué se modifica a nivel general en este bloque.",
+        sections: [
+          {
+            title: "Modelo funcional",
+            bullets: [
+              { title: "Cambio principal.", text: "Explicación corta del impacto." },
+              "También puede usarse un bullet como texto simple."
+            ]
+          }
+        ],
+        note: "Aclaración final opcional."
+      },
+      decision_questions_summary: {
+        "DQ-EJEMPLO-01": {
+          question: "Texto completo de la pregunta a resolver.",
+          status: "pending",
+          affected_ids: ["BX-1.1"]
+        }
+      }
+    },
+    changes: [
+      {
+        id: "BX-1.1",
+        action: "replace_exact",
+        section: "§0.2 Glosario normativo",
+        concept: "Ejemplo de concepto",
+        md_line: 120,
+        contexto_hallazgo: "Esta parte del Maestro define cómo funciona hoy este concepto dentro del modelo.",
+        resumen_cambio: "Se propone llevar esta definición al modelo común y eliminar la lógica paralela que ya no corresponde.",
+        current_text: "Texto actual tal cual figura en el Maestro.",
+        replacement_text: "Texto propuesto.",
+        reason: "Motivo del cambio.",
+        antecedente: "Párrafo narrativo explicando el origen del término.",
+        que_se_conserva: null,
+        impacto_o_tema_relacionado: null,
+        estado: null,
+        bloque_diferido: null,
+        decision_source: "review",
+        change_type: "mechanical",
+        review_priority: "low",
+        needs_human_review: false,
+        review_note: "Ancla conceptual del bloque.",
+        review_group_id: "01-bx-ejemplo",
+        review_group_title: "01 · Bloque X · Ejemplo",
+        decision_question_id: null
+      },
+      {
+        id: "BX-1.2",
+        action: "manual_review",
+        section: "§4.1.2 Segmento D",
+        concept: "Caso a resolver con análisis",
+        md_line: 340,
+        current_text: "Texto actual ambiguo.",
+        replacement_text: null,
+        reason: "Requiere definir un criterio antes de tocar el texto.",
+        antecedente: null,
+        que_se_conserva: null,
+        impacto_o_tema_relacionado: null,
+        estado: null,
+        bloque_diferido: null,
+        decision_source: "review",
+        change_type: "pending",
+        review_priority: "high",
+        needs_human_review: true,
+        review_note: null,
+        review_group_id: "01-bx-ejemplo",
+        review_group_title: "01 · Bloque X · Ejemplo",
+        decision_question_id: "DQ-EJEMPLO-01"
+      }
+    ]
+  };
+  el.innerHTML = renderMarkdown(SCHEMA_DOC_MD) +
+    '<div class="field"><div class="lbl">Ejemplo mínimo completo, listo para copiar como plantilla</div>' +
+    '<pre class="schema-example"><code>' + escapeHtml(JSON.stringify(example, null, 2)) + '</code></pre></div>';
+}
+renderSchemaDoc();
+
+function actionColor(action){
+  if(action === 'replace_exact' || action === 'replace_block') return 'green';
+  if(action === 'delete') return 'red';
+  if(action === 'manual_review') return 'orange';
+  if(action === 'skip') return 'gray';
+  return 'gray';
+}
+function priorityColor(priority){
+  if(priority === 'high') return 'red';
+  if(priority === 'medium') return 'yellow';
+  if(priority === 'low') return 'gray';
+  return 'gray';
+}
+function changeTypeColor(type){
+  if(type === 'critical') return 'red';
+  if(type === 'conceptual') return 'blue';
+  if(type === 'mechanical') return 'gray';
+  return 'gray';
+}
+function actionLabel(action){
+  const map = {
+    replace_exact: 'Replace', replace_block: 'Replace (bloque)',
+    delete: 'Delete', skip: 'Skip', manual_review: 'Manual Review'
+  };
+  return map[action] || (action || '(sin action)');
+}
+
+// Display-only translation of a DQ's status value. Never rewrites the
+// underlying data — dq.status keeps whatever the JSON declared.
+function statusLabel(status){
+  const map = { pending: 'Pendiente', resolved: 'Resuelta', closed: 'Resuelta' };
+  return map[status] || status;
+}
+function isDQResolvedBySource(dq){
+  return dq && (dq.status === 'resolved' || dq.status === 'closed');
+}
+function isDQEffectivelyResolved(dq, stored){
+  return isDQResolvedBySource(dq) || !!(stored && stored.resolved);
+}
+function dqEffectiveAnswer(dq, stored){
+  if(stored && stored.answer && stored.answer.trim() !== '') return stored.answer;
+  return (dq && dq.answer) ? dq.answer : '';
+}
+
+/* field rendering: never show a label if the value is null/empty */
+function renderField(label, value, opts){
+  if(value === null || value === undefined || value === '') return '';
+  opts = opts || {};
+  const content = opts.markdown ? renderMarkdown(value) : ('<span class="val">' + escapeHtml(value) + '</span>');
+  return '<div class="field"><div class="lbl">' + escapeHtml(label) + '</div>' + content + '</div>';
+}
+
+/* =========================================================
+   DECISION QUESTION ANSWERS
+   Stored in the browser (localStorage), keyed by bloque + DQ id
+   so answers survive reloading the same file, and never touch
+   the source JSON. Purely local capture + export.
+   ========================================================= */
+let CURRENT_DQ_ENTRIES = [];
+let DQ_INDEX = {};
+
+function answerStorageKey(bloque, dqId){
+  return 'merion_dq_answer::' + cssSafe(bloque) + '::' + cssSafe(dqId);
+}
+function loadAnswer(bloque, dqId){
+  try{
+    const raw = localStorage.getItem(answerStorageKey(bloque, dqId));
+    if(!raw) return { answer:'', resolved:false, updatedAt:null };
+    const parsed = JSON.parse(raw);
+    return {
+      answer: parsed.answer || '',
+      resolved: !!parsed.resolved,
+      updatedAt: parsed.updatedAt || null
+    };
+  }catch(e){
+    return { answer:'', resolved:false, updatedAt:null };
+  }
+}
+function saveAnswer(bloque, dqId, data){
+  try{
+    localStorage.setItem(answerStorageKey(bloque, dqId), JSON.stringify(data));
+    return true;
+  }catch(e){
+    return false;
+  }
+}
+function deleteAnswer(bloque, dqId){
+  try{
+    localStorage.removeItem(answerStorageKey(bloque, dqId));
+    return true;
+  }catch(e){
+    return false;
+  }
+}
+
+function dqCommentStorageKey(bloque, dqId){
+  return 'merion_dq_comment::' + cssSafe(bloque) + '::' + cssSafe(dqId);
+}
+function loadDQComment(bloque, dqId){
+  try{
+    const raw = localStorage.getItem(dqCommentStorageKey(bloque, dqId));
+    if(!raw) return { comment:'', updatedAt:null };
+    const parsed = JSON.parse(raw);
+    return { comment: parsed.comment || '', updatedAt: parsed.updatedAt || null };
+  }catch(e){
+    return { comment:'', updatedAt:null };
+  }
+}
+function saveDQComment(bloque, dqId, data){
+  try{
+    localStorage.setItem(dqCommentStorageKey(bloque, dqId), JSON.stringify(data));
+    return true;
+  }catch(e){
+    return false;
+  }
+}
+function deleteDQComment(bloque, dqId){
+  try{
+    localStorage.removeItem(dqCommentStorageKey(bloque, dqId));
+    return true;
+  }catch(e){
+    return false;
+  }
+}
+
+function debounce(fn, wait){
+  let t;
+  return function(){
+    const args = arguments;
+    clearTimeout(t);
+    t = setTimeout(function(){ fn.apply(null, args); }, wait);
+  };
+}
+
+function formatTime(iso){
+  try{
+    return new Date(iso).toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'});
+  }catch(e){
+    return '';
+  }
+}
+
+function updateAnsweredCount(){
+  const el = document.getElementById('dq-answered-count');
+  if(!el) return;
+  let pending = 0;
+  let resolved = 0;
+  let answeredPending = 0;
+  CURRENT_DQ_ENTRIES.forEach(function(dq){
+    const stored = loadAnswer(dq._sourceLabel, dq.dqId);
+    const isResolved = isDQEffectivelyResolved(dq, stored);
+    if(isResolved){
+      resolved++;
+    }else{
+      pending++;
+      const answer = dqEffectiveAnswer(dq, stored);
+      if(answer && answer.trim() !== '') answeredPending++;
+    }
+  });
+  el.textContent = pending + ' pendientes · ' + resolved + ' resueltas · ' +
+    answeredPending + ' de ' + pending + ' pendientes respondidas';
+}
+
+function updateResolvedVisual(anchorId, resolved){
+  const card = document.getElementById(anchorId);
+  const head = card ? card.querySelector('.dq-head') : null;
+  if(!card || !head) return;
+  card.classList.toggle('dq-card-resolved', resolved);
+  let badge = document.getElementById(anchorId + '-resolved-badge');
+  if(resolved && !badge){
+    badge = document.createElement('span');
+    badge.className = 'dq-resolved-badge';
+    badge.id = anchorId + '-resolved-badge';
+    badge.textContent = '✓ Resuelta';
+    head.insertBefore(badge, head.children[1] || null);
+  }else if(!resolved && badge){
+    badge.remove();
+  }
+}
+
+function attachDQAnswerHandlers(dqEntries){
+  dqEntries.forEach(function(dq){
+    const taId = dq._anchorId + '-answer';
+    const cbId = dq._anchorId + '-resolved';
+    const stId = dq._anchorId + '-savestate';
+    const clearId = dq._anchorId + '-clear';
+    const textarea = document.getElementById(taId);
+    const checkbox = document.getElementById(cbId);
+    const saveState = document.getElementById(stId);
+    const clearBtn = document.getElementById(clearId);
+    if(!textarea || !checkbox || !saveState) return;
+
+    const stored = loadAnswer(dq._sourceLabel, dq.dqId);
+    textarea.value = dqEffectiveAnswer(dq, stored);
+    checkbox.checked = !!stored.resolved;
+    saveState.textContent = stored.updatedAt ? ('Guardado · ' + formatTime(stored.updatedAt)) : '';
+
+    const doSave = function(){
+      const data = { answer: textarea.value, resolved: checkbox.checked, updatedAt: new Date().toISOString() };
+      const ok = saveAnswer(dq._sourceLabel, dq.dqId, data);
+      saveState.textContent = ok ? ('Guardado · ' + formatTime(data.updatedAt)) : 'No se pudo guardar en este navegador.';
+      updateResolvedVisual(dq._anchorId, checkbox.checked);
+      updateAnsweredCount();
+    };
+    const debouncedSave = debounce(doSave, 500);
+
+    textarea.addEventListener('input', function(){
+      saveState.textContent = 'Escribiendo…';
+      debouncedSave();
+    });
+    checkbox.addEventListener('change', doSave);
+    if(clearBtn){
+      clearBtn.addEventListener('click', function(){
+        deleteAnswer(dq._sourceLabel, dq.dqId);
+        textarea.value = '';
+        checkbox.checked = false;
+        saveState.textContent = '';
+        updateResolvedVisual(dq._anchorId, false);
+        updateAnsweredCount();
+      });
+    }
+  });
+}
+
+function attachDQCommentHandlers(dqEntries){
+  dqEntries.forEach(function(dq){
+    const taId = dq._anchorId + '-extra-comment';
+    const stId = dq._anchorId + '-extra-comment-savestate';
+    const clearId = dq._anchorId + '-extra-comment-clear';
+    const textarea = document.getElementById(taId);
+    const saveState = document.getElementById(stId);
+    const clearBtn = document.getElementById(clearId);
+    if(!textarea || !saveState) return;
+
+    const stored = loadDQComment(dq._sourceLabel, dq.dqId);
+    textarea.value = stored.comment || '';
+    saveState.textContent = stored.updatedAt ? ('Guardado · ' + formatTime(stored.updatedAt)) : '';
+
+    const doSave = function(){
+      const data = { comment: textarea.value, updatedAt: new Date().toISOString() };
+      const ok = saveDQComment(dq._sourceLabel, dq.dqId, data);
+      saveState.textContent = ok ? ('Guardado · ' + formatTime(data.updatedAt)) : 'No se pudo guardar en este navegador.';
+    };
+    const debouncedSave = debounce(doSave, 500);
+
+    textarea.addEventListener('input', function(){
+      saveState.textContent = 'Escribiendo…';
+      debouncedSave();
+    });
+
+    if(clearBtn){
+      clearBtn.addEventListener('click', function(){
+        deleteDQComment(dq._sourceLabel, dq.dqId);
+        textarea.value = '';
+        saveState.textContent = '';
+      });
+    }
+  });
+}
+
+function collectAnswersForExport(){
+  const combined = buildCombinedView(SOURCES);
+  return combined.dqEntries.map(function(dq){
+    const stored = loadAnswer(dq._sourceLabel, dq.dqId);
+    const extraComment = loadDQComment(dq._sourceLabel, dq.dqId);
+    return {
+      dq_id: dq.dqId,
+      bloque: dq._sourceLabel,
+      status_original: dq.status,
+      sub_bloque: dq.subBloque,
+      question: dq.question,
+      affected_ids: dq.affected_ids,
+      answer: dqEffectiveAnswer(dq, stored),
+      resolved: isDQEffectivelyResolved(dq, stored),
+      updated_at: stored.updatedAt || null,
+      review_comment: extraComment.comment || '',
+      review_comment_updated_at: extraComment.updatedAt || null
+    };
+  });
+}
+
+function downloadFile(filename, content, mime){
+  const blob = new Blob([content], { type: mime + ';charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+}
+
+function exportAnswersJSON(){
+  const items = collectAnswersForExport();
+  const payload = { exported_at: new Date().toISOString(), decision_questions: items };
+  downloadFile('respuestas-decision-questions.json', JSON.stringify(payload, null, 2), 'application/json');
+}
+
+function exportAnswersMarkdown(){
+  const items = collectAnswersForExport();
+  let md = '# Respuestas a Decision Questions\n\n';
+  md += '_Exportado: ' + new Date().toISOString() + '_\n\n';
+  if(!items.length){
+    md += 'No hay Decision Questions cargadas.\n';
+  }else{
+    items.forEach(function(item){
+      md += '## ' + item.dq_id + ' — ' + item.bloque + '\n\n';
+      if(item.status_original) md += '**Status original:** ' + item.status_original + '\n\n';
+      if(item.sub_bloque) md += '**Sub-bloque:** ' + item.sub_bloque + '\n\n';
+      if(item.question) md += '**Pregunta:** ' + item.question + '\n\n';
+      if(item.affected_ids.length) md += '**Hallazgos afectados:** ' + item.affected_ids.join(', ') + '\n\n';
+      md += '**Respuesta:** ' + (item.answer.trim() ? item.answer.trim() : '_Sin respuesta aún._') + '\n\n';
+      md += '**Marcada como resuelta:** ' + (item.resolved ? 'Sí' : 'No') + '\n\n';
+      if(item.review_comment && item.review_comment.trim()){
+        md += '**Comentario adicional:** ' + item.review_comment.trim() + '\n\n';
+      }
+      md += '---\n\n';
+    });
+  }
+  downloadFile('respuestas-decision-questions.md', md, 'text/markdown');
+}
+
+/* =========================================================
+   FINDING NOTES (per manual_review item)
+   Same idea as Decision Question answers: stored locally,
+   keyed by bloque + finding id, never touching the JSON.
+   ========================================================= */
+let CURRENT_COMMENTABLE_CHANGES = [];
+
+function noteStorageKey(bloque, id){
+  return 'merion_finding_note::' + cssSafe(bloque) + '::' + cssSafe(id);
+}
+function loadFindingNote(bloque, id){
+  try{
+    const raw = localStorage.getItem(noteStorageKey(bloque, id));
+    if(!raw) return { note:'', resolved:false, updatedAt:null };
+    const parsed = JSON.parse(raw);
+    return { note: parsed.note || '', resolved: !!parsed.resolved, updatedAt: parsed.updatedAt || null };
+  }catch(e){
+    return { note:'', resolved:false, updatedAt:null };
+  }
+}
+function saveFindingNote(bloque, id, data){
+  try{
+    localStorage.setItem(noteStorageKey(bloque, id), JSON.stringify(data));
+    return true;
+  }catch(e){
+    return false;
+  }
+}
+function deleteFindingNote(bloque, id){
+  try{
+    localStorage.removeItem(noteStorageKey(bloque, id));
+    return true;
+  }catch(e){
+    return false;
+  }
+}
+
+function updateFindingNotesCount(allChanges){
+  const el = document.getElementById('finding-notes-count');
+  if(!el) return;
+  let withNotes = 0;
+  allChanges.forEach(function(c){
+    const stored = loadFindingNote(c._sourceLabel, c.id);
+    if(stored.note && stored.note.trim() !== '') withNotes++;
+  });
+  el.textContent = withNotes + ' de ' + allChanges.length + ' hallazgos con comentario';
+}
+
+function buildSingleCommentMarkdown(c, stored){
+  let md = '# Comentario — ' + c.id + '\n\n';
+  md += '_Exportado: ' + new Date().toISOString() + '_\n\n';
+  md += '**Bloque:** ' + c._sourceLabel + '\n\n';
+  if(c.section) md += '**Ubicación:** ' + c.section + '\n\n';
+  if(c.concept) md += '**Concept:** ' + c.concept + '\n\n';
+  if(c.action) md += '**Acción propuesta:** ' + c.action + '\n\n';
+  if(c.contexto_hallazgo) md += '**Contexto:** ' + c.contexto_hallazgo + '\n\n';
+  if(c.resumen_cambio) md += '**Qué se cambia:** ' + c.resumen_cambio + '\n\n';
+  if(c.current_text) md += '**Texto actual:**\n\n' + c.current_text + '\n\n';
+  if(c.replacement_text) md += '**Texto propuesto:**\n\n' + c.replacement_text + '\n\n';
+  if(c.reason) md += '**Motivo original:** ' + c.reason + '\n\n';
+  if(c.decision_question_id) md += '**Pregunta de decisión relacionada:** ' + c.decision_question_id + '\n\n';
+  md += '**Comentario:** ' + ((stored.note || '').trim() ? stored.note.trim() : '_Sin texto, solo marcado como revisado._') + '\n\n';
+  md += '**Marcado como revisado:** ' + (stored.resolved ? 'Sí' : 'No') + '\n\n';
+  return md;
+}
+
+function attachFindingNoteHandlers(allChanges){
+  allChanges.forEach(function(c){
+    const taId = c._anchorId + '-note';
+    const cbId = c._anchorId + '-note-resolved';
+    const stId = c._anchorId + '-note-savestate';
+    const clearId = c._anchorId + '-note-clear';
+    const downloadId = c._anchorId + '-note-download';
+    const textarea = document.getElementById(taId);
+    const checkbox = document.getElementById(cbId);
+    const saveState = document.getElementById(stId);
+    const clearBtn = document.getElementById(clearId);
+    const downloadBtn = document.getElementById(downloadId);
+    if(!textarea || !checkbox || !saveState) return;
+
+    const stored = loadFindingNote(c._sourceLabel, c.id);
+    textarea.value = stored.note || '';
+    checkbox.checked = !!stored.resolved;
+    saveState.textContent = stored.updatedAt ? ('Guardado · ' + formatTime(stored.updatedAt)) : '';
+
+    const doSave = function(){
+      const data = { note: textarea.value, resolved: checkbox.checked, updatedAt: new Date().toISOString() };
+      const ok = saveFindingNote(c._sourceLabel, c.id, data);
+      saveState.textContent = ok ? ('Guardado · ' + formatTime(data.updatedAt)) : 'No se pudo guardar en este navegador.';
+      updateFindingNotesCount(allChanges);
+    };
+    const debouncedSave = debounce(doSave, 500);
+
+    textarea.addEventListener('input', function(){
+      saveState.textContent = 'Escribiendo…';
+      debouncedSave();
+    });
+    checkbox.addEventListener('change', doSave);
+    if(clearBtn){
+      clearBtn.addEventListener('click', function(){
+        deleteFindingNote(c._sourceLabel, c.id);
+        textarea.value = '';
+        checkbox.checked = false;
+        saveState.textContent = '';
+        updateFindingNotesCount(allChanges);
+      });
+    }
+    if(downloadBtn){
+      downloadBtn.addEventListener('click', function(){
+        const stored = { note: textarea.value, resolved: checkbox.checked };
+        const md = buildSingleCommentMarkdown(c, stored);
+        downloadFile('comentario-' + c.id + '.md', md, 'text/markdown');
+      });
+    }
+  });
+}
+
+function collectFindingNotesForExport(){
+  const combined = buildCombinedView(SOURCES);
+  return combined.changes
+    .map(function(c){
+      const stored = loadFindingNote(c._sourceLabel, c.id);
+      return {
+        id: c.id,
+        bloque: c._sourceLabel,
+        section: c.section,
+        concept: c.concept,
+        action: c.action,
+        contexto_hallazgo: c.contexto_hallazgo || null,
+        resumen_cambio: c.resumen_cambio || null,
+        current_text: c.current_text || null,
+        replacement_text: c.replacement_text || null,
+        reason: c.reason,
+        decision_question_id: c.decision_question_id || null,
+        note: stored.note || '',
+        resolved: !!stored.resolved,
+        updated_at: stored.updatedAt || null
+      };
+    })
+    .filter(function(item){ return (item.note && item.note.trim() !== '') || item.resolved; });
+}
+
+function exportFindingNotesJSON(){
+  const items = collectFindingNotesForExport();
+  const payload = { exported_at: new Date().toISOString(), comentarios_hallazgos: items };
+  downloadFile('comentarios-hallazgos.json', JSON.stringify(payload, null, 2), 'application/json');
+}
+
+function exportFindingNotesMarkdown(){
+  const items = collectFindingNotesForExport();
+  let md = '# Comentarios sobre hallazgos\n\n';
+  md += '_Exportado: ' + new Date().toISOString() + '_\n\n';
+  if(!items.length){
+    md += 'Todavía no se escribió ningún comentario.\n';
+  }else{
+    items.forEach(function(item){
+      md += '## ' + item.id + ' — ' + item.bloque + '\n\n';
+      if(item.section) md += '**Ubicación:** ' + item.section + '\n\n';
+      if(item.concept) md += '**Concept:** ' + item.concept + '\n\n';
+      if(item.action) md += '**Acción propuesta:** ' + item.action + '\n\n';
+      if(item.contexto_hallazgo) md += '**Contexto:** ' + item.contexto_hallazgo + '\n\n';
+      if(item.resumen_cambio) md += '**Qué se cambia:** ' + item.resumen_cambio + '\n\n';
+      if(item.current_text) md += '**Texto actual:**\n\n' + item.current_text + '\n\n';
+      if(item.replacement_text) md += '**Texto propuesto:**\n\n' + item.replacement_text + '\n\n';
+      if(item.reason) md += '**Motivo original:** ' + item.reason + '\n\n';
+      if(item.decision_question_id) md += '**Pregunta de decisión relacionada:** ' + item.decision_question_id + '\n\n';
+      md += '**Comentario:** ' + (item.note.trim() ? item.note.trim() : '_Sin texto, solo marcado como revisado._') + '\n\n';
+      md += '**Marcado como revisado:** ' + (item.resolved ? 'Sí' : 'No') + '\n\n';
+      md += '---\n\n';
+    });
+  }
+  downloadFile('comentarios-hallazgos.md', md, 'text/markdown');
+}
+
+/* =========================================================
+   REPORT RENDERERS
+   ========================================================= */
+function rebuildReport(){
+  renderFileChips();
+  if(!SOURCES.length){
+    document.getElementById('report').classList.remove('visible');
+    document.getElementById('report-nav').classList.remove('visible');
+    filtersInitialized = false; // next load starts fresh with the default view again
+    return;
+  }
+  if(!filtersInitialized){
+    ACTIVE_FILTERS = Object.assign({}, DEFAULT_FILTERS);
+    filtersInitialized = true;
+  }
+  const combined = buildCombinedView(SOURCES);
+  DQ_INDEX = combined.dqIndex;
+  renderMetadata(SOURCES, combined.changes.length);
+  renderSummary(SOURCES, combined.changes);
+  renderChangeSummary(SOURCES);
+  renderDecisionQuestions(combined.dqEntries);
+  renderFilters(combined.changes);
+  renderReviewGroups(combined.changes);
+  renderNavGroups(combined.changes);
+
+  const commentableChanges = combined.changes;
+  CURRENT_COMMENTABLE_CHANGES = commentableChanges;
+  const groupsToolbar = document.getElementById('groups-toolbar');
+  if(commentableChanges.length){
+    groupsToolbar.classList.add('visible');
+    attachFindingNoteHandlers(commentableChanges);
+    updateFindingNotesCount(commentableChanges);
+  }else{
+    groupsToolbar.classList.remove('visible');
+  }
+
+  document.getElementById('report').classList.add('visible');
+  document.getElementById('report-nav').classList.add('visible');
+  applyFilters();
+}
+
+function renderFileChips(){
+  const holder = document.getElementById('files-loaded');
+  holder.innerHTML = '';
+  SOURCES.forEach(function(src){
+    const chip = document.createElement('div');
+    chip.className = 'file-chip ' + sourceColorClass(src.sourceId);
+    chip.innerHTML =
+      '<div class="info">' +
+        '<span class="name">' + escapeHtml(src.fileName) + '</span>' +
+        '<span class="bloque">' + escapeHtml(src.metadata.bloque || 'sin nombre de bloque') + '</span>' +
+      '</div>' +
+      '<div class="actions">' +
+        '<span class="count">' + src.changes.length + ' hallazgos</span>' +
+      '</div>';
+    const btn = document.createElement('button');
+    btn.textContent = 'Quitar';
+    btn.onclick = function(){ removeSource(src.sourceId); };
+    chip.querySelector('.actions').appendChild(btn);
+    holder.appendChild(chip);
+  });
+  document.getElementById('dropzone-main').textContent = SOURCES.length
+    ? 'Hacé clic o arrastrá para agregar otro archivo .json a este informe'
+    : 'Hacé clic para seleccionar uno o más archivos .json, o arrastralos aquí';
+}
+
+function renderMetadata(sources, combinedTotal){
+  const list = document.getElementById('sources-list');
+  list.innerHTML = '';
+  sources.forEach(function(src){
+    const meta = src.metadata;
+    const row = document.createElement('div');
+    row.className = 'source-row';
+    row.innerHTML =
+      '<div class="bloque-title ' + sourceColorClass(src.sourceId) + '"><span class="src-dot"></span>' + escapeHtml(meta.bloque || src.fileName) + '</div>' +
+      '<div class="meta-row">' +
+        '<span><b>Fuente funcional:</b> ' + escapeHtml(meta.functional_source || '—') + '</span>' +
+        '<span><b>Documento revisado:</b> ' + escapeHtml(meta.master_base || '—') + '</span>' +
+        '<span><b>Total de hallazgos:</b> ' + escapeHtml(meta.total_changes !== null ? meta.total_changes : src.changes.length) + '</span>' +
+        (meta.generated_at ? '<span><b>Generado:</b> ' + escapeHtml(meta.generated_at) + '</span>' : '') +
+      '</div>' +
+      (meta.purpose ? '<div class="meta-row" style="margin-top:6px;"><span><b>Propósito de este archivo:</b> ' + escapeHtml(meta.purpose) + '</span></div>' : '');
+    list.appendChild(row);
+  });
+  if(sources.length > 1){
+    const totalRow = document.createElement('div');
+    totalRow.className = 'combined-total';
+    totalRow.innerHTML = escapeHtml(sources.length) + ' bloques cargados · <b>' + escapeHtml(combinedTotal) + '</b> hallazgos combinados';
+    list.appendChild(totalRow);
+  }
+}
+
+
+function renderChangeSummary(sources){
+  const panel = document.getElementById('panel-change-summary');
+  const container = document.getElementById('change-summary-container');
+  const navLink = document.getElementById('nav-change-summary');
+  if(!panel || !container) return;
+
+  const items = sources.filter(function(src){
+    const s = src.metadata.change_summary;
+    if(!s) return false;
+    if(typeof s === 'string') return s.trim() !== '';
+    if(typeof s !== 'object') return false;
+    return !!(
+      (s.intro && String(s.intro).trim()) ||
+      (s.note && String(s.note).trim()) ||
+      (Array.isArray(s.bullets) && s.bullets.length) ||
+      (Array.isArray(s.sections) && s.sections.length)
+    );
+  });
+
+  if(!items.length){
+    panel.style.display = 'none';
+    container.innerHTML = '';
+    if(navLink) navLink.style.display = 'none';
+    return;
+  }
+
+  panel.style.display = '';
+  if(navLink) navLink.style.display = '';
+  container.innerHTML = '';
+
+  const multiSource = sources.length > 1;
+
+  function renderBullet(raw){
+    if(raw === null || raw === undefined) return '';
+    if(typeof raw === 'string'){
+      return '<li>' + renderMarkdown(raw) + '</li>';
+    }
+    if(typeof raw === 'object'){
+      const title = raw.title ? '<strong>' + escapeHtml(raw.title) + '</strong> ' : '';
+      const text = raw.text ? renderMarkdown(raw.text) : '';
+      return '<li>' + title + text + '</li>';
+    }
+    return '<li>' + escapeHtml(String(raw)) + '</li>';
+  }
+
+  items.forEach(function(src){
+    const s = src.metadata.change_summary;
+    const box = document.createElement('div');
+    box.className = 'change-summary-source ' + sourceColorClass(src.sourceId);
+
+    if(typeof s === 'string'){
+      box.innerHTML =
+        (multiSource ? '<div class="change-summary-title">' + escapeHtml(src.metadata.bloque || src.fileName) + '</div>' : '') +
+        '<div class="change-summary-intro">' + renderMarkdown(s) + '</div>';
+      container.appendChild(box);
+      return;
+    }
+
+    const title = s.title || (multiSource ? (src.metadata.bloque || src.fileName) : 'Resumen de cambios');
+    let htmlBlock = '<div class="change-summary-title">' + escapeHtml(title) + '</div>';
+
+    if(multiSource){
+      htmlBlock += '<div class="source-tag ' + sourceColorClass(src.sourceId) + '" style="margin-bottom:10px;">' + escapeHtml(src.metadata.bloque || src.fileName) + '</div>';
+    }
+
+    if(s.intro){
+      htmlBlock += '<div class="change-summary-intro">' + renderMarkdown(s.intro) + '</div>';
+    }
+
+    if(Array.isArray(s.bullets) && s.bullets.length){
+      htmlBlock += '<ul class="change-summary-list">' + s.bullets.map(renderBullet).join('') + '</ul>';
+    }
+
+    if(Array.isArray(s.sections)){
+      s.sections.forEach(function(sec){
+        if(!sec || typeof sec !== 'object') return;
+        const bullets = Array.isArray(sec.bullets) ? sec.bullets : [];
+        if(!sec.title && !bullets.length) return;
+        htmlBlock += '<div class="change-summary-section">';
+        if(sec.title){
+          htmlBlock += '<div class="change-summary-section-title">' + escapeHtml(sec.title) + '</div>';
+        }
+        if(bullets.length){
+          htmlBlock += '<ul class="change-summary-list">' + bullets.map(renderBullet).join('') + '</ul>';
+        }
+        htmlBlock += '</div>';
+      });
+    }
+
+    if(s.note){
+      htmlBlock += '<div class="change-summary-note">' + renderMarkdown(s.note) + '</div>';
+    }
+
+    box.innerHTML = htmlBlock;
+    container.appendChild(box);
+  });
+}
+
+function renderSummary(sources, changes){
+  const grid = document.getElementById('summary-grid');
+  grid.innerHTML = '';
+
+  const declaredTotal = sources.reduce(function(sum, s){
+    return sum + (s.metadata.total_changes !== null ? s.metadata.total_changes : s.changes.length);
+  }, 0);
+  grid.innerHTML += '<div class="summary-card total"><div class="n">' + escapeHtml(declaredTotal) + '</div><div class="l">Total</div></div>';
+
+  // sum resumen_acciones across every loaded source
+  const combinedResumen = {};
+  sources.forEach(function(s){
+    const r = s.metadata.resumen_acciones || {};
+    Object.keys(r).forEach(function(key){
+      combinedResumen[key] = (combinedResumen[key] || 0) + (r[key] || 0);
+    });
+  });
+
+  const order = ['replace_exact','replace_block','delete','manual_review','skip'];
+  const keys = order.concat(Object.keys(combinedResumen).filter(function(k){ return order.indexOf(k) === -1; }));
+  keys.forEach(function(key){
+    if(!(key in combinedResumen)) return;
+    grid.innerHTML += '<div class="summary-card"><div class="n">' + escapeHtml(combinedResumen[key]) +
+      '</div><div class="l">' + escapeHtml(actionLabel(key)) + '</div></div>';
+  });
+
+  // consistency check across the combined set (display only, never modifies data)
+  const actual = computeActionCounts(changes);
+  const mismatches = [];
+  Object.keys(combinedResumen).forEach(function(key){
+    const declared = combinedResumen[key];
+    const found = actual[key] || 0;
+    if(declared !== found){
+      mismatches.push(key + ': declarado ' + declared + ', encontrado ' + found);
+    }
+  });
+  const warnEl = document.getElementById('summary-warning');
+  if(mismatches.length){
+    warnEl.style.display = 'block';
+    warnEl.textContent = 'Advertencia: el resumen declarado no coincide con los hallazgos cargados (' + mismatches.join(' · ') + ').';
+  }else{
+    warnEl.style.display = 'none';
+  }
+}
+
+function renderDecisionQuestions(dqEntries){
+  const list = document.getElementById('dq-list');
+  const empty = document.getElementById('dq-empty');
+  const toolbar = document.getElementById('dq-toolbar');
+  const panelCount = document.getElementById('dq-panel-count');
+  list.innerHTML = '';
+  CURRENT_DQ_ENTRIES = dqEntries;
+
+  if(panelCount){
+    const pendingCount = dqEntries.filter(function(dq){
+      const stored = loadAnswer(dq._sourceLabel, dq.dqId);
+      return !isDQEffectivelyResolved(dq, stored);
+    }).length;
+    panelCount.textContent = dqEntries.length ? '(' + pendingCount + ')' : '';
+  }
+
+  if(!dqEntries.length){
+    empty.style.display = 'block';
+    toolbar.classList.remove('visible');
+    return;
+  }
+  empty.style.display = 'none';
+  toolbar.classList.add('visible');
+
+  const multiSource = new Set(dqEntries.map(function(d){ return d._sourceId; })).size > 1;
+  dqEntries.forEach(function(dq){
+    const stored = loadAnswer(dq._sourceLabel, dq.dqId);
+    const effectiveResolved = isDQEffectivelyResolved(dq, stored);
+    const sourceResolved = isDQResolvedBySource(dq);
+    const effectiveAnswer = dqEffectiveAnswer(dq, stored);
+    const resolvedClass = effectiveResolved ? ' dq-card-resolved' : '';
+    let html = '<div class="dq-card' + resolvedClass + '" id="' + dq._anchorId + '">';
+    html += '<div class="dq-head"><span class="dq-id">' + escapeHtml(dq.dqId) + '</span>';
+    if(effectiveResolved){
+      html += '<span class="dq-resolved-badge" id="' + dq._anchorId + '-resolved-badge">✓ Resuelta</span>';
+    }
+    if(dq.status){
+      html += renderBadge(statusLabel(dq.status), dq.status === 'pending' ? 'orange' : 'green');
+    }else if(dq.subBloque){
+      html += renderBadge('Sub-bloque: ' + dq.subBloque, 'blue');
+    }
+    if(multiSource) html += '<span class="source-tag ' + sourceColorClass(dq._sourceId) + '">' + escapeHtml(dq._sourceLabel) + '</span>';
+    html += '</div>';
+    if(dq.question){
+      html += '<div class="dq-question">' + renderMarkdown(dq.question) + '</div>';
+    }else{
+      html += '<div class="dq-question dq-question-missing">Esta pregunta de decisión no tiene el texto de la pregunta cargado en el JSON (campo "question" vacío para ' + escapeHtml(dq.dqId) + ').</div>';
+    }
+
+    // "Dónde impacta" is derived purely from changes[].section for this DQ's
+    // affected_ids — nothing new is stored, this is computed at render time.
+    if(dq.affectedSections.length){
+      html += '<div class="dq-impact">' +
+        '<div class="dq-impact-label">Dónde impacta en el Documento Maestro</div>' +
+        '<ul class="dq-impact-list">' + dq.affectedSections.map(function(sec){
+          return '<li>' + escapeHtml(sec) + '</li>';
+        }).join('') + '</ul>' +
+      '</div>';
+    }else if(!dq.affected_ids.length){
+      html += '<div class="dq-question-missing" style="margin-bottom:10px;">Esta pregunta de decisión no tiene hallazgos relacionados en el JSON (campo "affected_ids" vacío).</div>';
+    }
+
+    html += '<div class="dq-meta">' + dq.affected_ids.length + ' hallazgo(s) relacionado(s)</div>';
+    if(dq.affected_ids.length){
+      html += '<div class="dq-ids">' + dq.affected_ids.map(function(id){
+        return '<a href="#' + changeAnchorFor(dq._sourceId, id) + '">' + escapeHtml(id) + '</a>';
+      }).join('') + '</div>';
+    }
+    if(sourceResolved){
+      html += '<div class="dq-recorded-answer">' +
+        '<span class="dq-answer-label">Respuesta / decisión registrada</span>' +
+        (effectiveAnswer && effectiveAnswer.trim() !== ''
+          ? renderMarkdown(effectiveAnswer)
+          : '<div class="dq-question-missing">Resuelta previamente. Este JSON no incluye el texto de la respuesta anterior para mostrar.</div>') +
+      '</div>';
+    }else{
+      html += '<div class="dq-answer-block">' +
+        '<label class="dq-answer-label" for="' + dq._anchorId + '-answer">Tu respuesta</label>' +
+        '<textarea class="dq-answer-textarea" id="' + dq._anchorId + '-answer" placeholder="Escribí acá la resolución o decisión..."></textarea>' +
+        '<div class="dq-answer-footer">' +
+          '<label class="dq-resolved-label"><input type="checkbox" id="' + dq._anchorId + '-resolved"> Marcar como resuelta</label>' +
+          '<span class="dq-save-state" id="' + dq._anchorId + '-savestate"></span>' +
+          '<button type="button" class="clear-answer-btn" id="' + dq._anchorId + '-clear">Borrar respuesta</button>' +
+        '</div>' +
+      '</div>';
+    }
+
+    html += '<details class="dq-extra-comment">' +
+      '<summary>Agregar comentario</summary>' +
+      '<div class="dq-extra-comment-body">' +
+        '<label class="dq-answer-label" for="' + dq._anchorId + '-extra-comment">Comentario adicional</label>' +
+        '<textarea class="dq-answer-textarea" id="' + dq._anchorId + '-extra-comment" placeholder="Escribí un comentario para revisar o actualizar esta decisión después..."></textarea>' +
+        '<div class="dq-answer-footer">' +
+          '<span class="dq-save-state" id="' + dq._anchorId + '-extra-comment-savestate"></span>' +
+          '<button type="button" class="clear-answer-btn" id="' + dq._anchorId + '-extra-comment-clear">Borrar comentario</button>' +
+        '</div>' +
+      '</div>' +
+    '</details>';
+
+    html += '</div>';
+    list.innerHTML += html;
+  });
+
+  attachDQAnswerHandlers(dqEntries);
+  attachDQCommentHandlers(dqEntries);
+  updateAnsweredCount();
+}
+
+function renderFilters(changes){
+  const grid = document.getElementById('filters-grid');
+  grid.innerHTML = '';
+
+  // If an updated JSON removed a value that had been selected before
+  // (for example, all manual_review items became skip), clear that stale
+  // filter automatically. Otherwise the UI can show "Todos" while the
+  // hidden ACTIVE_FILTERS value still filters everything out.
+  const available = {
+    action: distinctValues(changes,'action'),
+    priority: distinctValues(changes,'review_priority'),
+    change_type: distinctValues(changes,'change_type'),
+    concept: distinctValues(changes,'concept'),
+    decision_question: distinctValues(changes,'decision_question_id')
+  };
+  ['action','priority','change_type','concept','decision_question'].forEach(function(key){
+    if(ACTIVE_FILTERS[key] && available[key].indexOf(ACTIVE_FILTERS[key]) === -1){
+      ACTIVE_FILTERS[key] = '';
+    }
+  });
+  if(ACTIVE_FILTERS.needs_human_review === 'yes' && !changes.some(function(c){ return c.needs_human_review; })){
+    ACTIVE_FILTERS.needs_human_review = '';
+  }
+  if(ACTIVE_FILTERS.needs_human_review === 'no' && !changes.some(function(c){ return !c.needs_human_review; })){
+    ACTIVE_FILTERS.needs_human_review = '';
+  }
+
+  function selectField(key, label, values, valueMap){
+    let html = '<div><label>' + escapeHtml(label) + '</label><select data-filter="' + key + '"><option value="">Todos</option>';
+    values.forEach(function(v){
+      const display = valueMap ? valueMap(v) : v;
+      html += '<option value="' + escapeHtml(v) + '">' + escapeHtml(display) + '</option>';
+    });
+    html += '</select></div>';
+    return html;
+  }
+
+  const multiSource = new Set(changes.map(function(c){ return c._sourceId; })).size > 1;
+  if(multiSource){
+    const sourceValues = [];
+    const seenSource = {};
+    changes.forEach(function(c){
+      if(!seenSource[c._sourceId]){ seenSource[c._sourceId] = c._sourceLabel; sourceValues.push(c._sourceId); }
+    });
+    grid.innerHTML += '<div><label>Bloque / archivo</label><select data-filter="source"><option value="">Todos</option>' +
+      sourceValues.map(function(sid){ return '<option value="' + escapeHtml(sid) + '">' + escapeHtml(seenSource[sid]) + '</option>'; }).join('') +
+      '</select></div>';
+  }
+
+  grid.innerHTML += selectField('action', 'Action', available.action, actionLabel);
+  grid.innerHTML += selectField('priority', 'Priority', available.priority);
+  grid.innerHTML += selectField('change_type', 'Change Type', available.change_type);
+  grid.innerHTML += selectField('concept', 'Concept', available.concept);
+
+  const groupValues = [];
+  const seenGroups = {};
+  changes.forEach(function(c){
+    const key = c._sourceId + '::' + (c.review_group_id === null ? '__OTHERS__' : c.review_group_id);
+    if(!seenGroups[key]){
+      const title = c.review_group_id === null ? 'Otros hallazgos' : (c.review_group_title || c.review_group_id);
+      seenGroups[key] = multiSource ? (title + ' — ' + c._sourceLabel) : title;
+      groupValues.push(key);
+    }
+  });
+  grid.innerHTML += '<div><label>Review Group</label><select data-filter="review_group"><option value="">Todos</option>' +
+    groupValues.map(function(k){ return '<option value="' + escapeHtml(k) + '">' + escapeHtml(seenGroups[k]) + '</option>'; }).join('') +
+    '</select></div>';
+
+  grid.innerHTML += '<div><label>Needs Human Review</label><select data-filter="needs_human_review"><option value="">Todos</option><option value="yes">Sí</option><option value="no">No</option></select></div>';
+
+  const dqValues = available.decision_question;
+  grid.innerHTML += '<div><label>Decision Question</label><select data-filter="decision_question"><option value="">Todas</option>' +
+    dqValues.map(function(v){ return '<option value="' + escapeHtml(v) + '">' + escapeHtml(v) + '</option>'; }).join('') +
+    '</select></div>';
+
+  grid.innerHTML += '<div><label>Buscar (ID, texto, sección, concept)</label><input type="text" data-filter="text" placeholder="Escribí para buscar..."></div>';
+
+  grid.querySelectorAll('select, input').forEach(function(el){
+    const key = el.getAttribute('data-filter');
+    // preserve current filter selections/values across rebuilds (e.g. adding another file)
+    el.value = ACTIVE_FILTERS[key] || '';
+    const evt = (el.tagName === 'SELECT') ? 'change' : 'input';
+    el.addEventListener(evt, function(){
+      ACTIVE_FILTERS[key] = el.value;
+      if(key === 'text'){
+        const navSearch = document.getElementById('nav-search');
+        if(navSearch) navSearch.value = el.value;
+      }
+      applyFilters();
+    });
+  });
+}
+
+function renderReviewGroups(changes){
+  const container = document.getElementById('groups-container');
+  container.innerHTML = '';
+  const groups = buildGroups(changes);
+  const multiSource = new Set(changes.map(function(c){ return c._sourceId; })).size > 1;
+  groups.forEach(function(group){
+    const block = document.createElement('div');
+    block.className = 'group-block';
+    block.id = 'group-' + cssSafe(group.key);
+    block.innerHTML = '<div class="group-title">' + escapeHtml(group.title) +
+      '<span class="count-pill">' + group.items.length + '</span>' +
+      (multiSource ? '<span class="source-tag ' + sourceColorClass(group.sourceId) + '">' + escapeHtml(group.sourceLabel) + '</span>' : '') +
+      '</div>';
+    const itemsWrap = document.createElement('div');
+    group.items.forEach(function(c){
+      itemsWrap.innerHTML += renderChange(c, multiSource);
+    });
+    block.appendChild(itemsWrap);
+    container.appendChild(block);
+  });
+}
+
+function renderNavGroups(changes){
+  const menu = document.getElementById('nav-groups-menu');
+  menu.innerHTML = '';
+  const groups = buildGroups(changes);
+  groups.forEach(function(g){
+    menu.innerHTML += '<a href="#group-' + cssSafe(g.key) + '">' + escapeHtml(g.title) + ' (' + g.items.length + ')</a>';
+  });
+}
+
+function renderChange(c, showSourceTag){
+  const priorityClass = (c.review_priority === 'high') ? ' priority-high' : '';
+  let html = '<div class="change ' + (c.action === 'skip' ? 'skip' : '') + priorityClass + '" id="' + c._anchorId + '" data-raw-id="' + escapeHtml(c.id) + '">';
+
+  html += '<div class="change-head">';
+  html += '<span class="change-id">' + escapeHtml(c.id) + '</span>';
+  if(c.concept) html += '<span class="change-concept">' + escapeHtml(c.concept) + '</span>';
+  if(showSourceTag) html += '<span class="source-tag ' + sourceColorClass(c._sourceId) + '">' + escapeHtml(c._sourceLabel) + '</span>';
+  html += '</div>';
+
+  // section is the canonical human-readable locator in the Documento Maestro.
+  // md_line is informational only: document edits shift line numbers, so it
+  // is never used as a fallback and never shown as the primary location —
+  // it only appears, secondarily, inside the detail toggle below.
+  html += '<div class="location-block">' +
+    '<div class="location-label">Ubicación en el Documento Maestro</div>' +
+    '<div class="location-value">' + (c.section ? escapeHtml(c.section) : '<span class="location-missing">Ubicación no informada</span>') + '</div>' +
+  '</div>';
+
+  html += '<div class="badge-row">';
+  html += renderBadge(actionLabel(c.action), actionColor(c.action));
+  if(c.change_type) html += renderBadge(c.change_type, changeTypeColor(c.change_type));
+  if(c.review_priority) html += renderBadge(c.review_priority, priorityColor(c.review_priority));
+  if(c.needs_human_review) html += renderBadge('Requiere revisión humana', 'red');
+  html += '</div>';
+
+  if(c.contexto_hallazgo){
+    html += '<div class="finding-context-box">' +
+      '<div class="lbl">Contexto</div>' +
+      renderMarkdown(c.contexto_hallazgo) +
+    '</div>';
+  }
+
+  if(c.resumen_cambio){
+    html += '<div class="finding-change-box">' +
+      '<div class="lbl">Qué se cambia</div>' +
+      renderMarkdown(c.resumen_cambio) +
+    '</div>';
+  }
+
+  html += renderComparison(c);
+
+  html += '<div class="dq-answer-block">' +
+    '<label class="dq-answer-label" for="' + c._anchorId + '-note">Tu comentario</label>' +
+    '<textarea class="dq-answer-textarea" id="' + c._anchorId + '-note" placeholder="Escribí acá tu comentario, objeción o ajuste sobre este cambio propuesto..."></textarea>' +
+    '<div class="dq-answer-footer">' +
+      '<label class="dq-resolved-label"><input type="checkbox" id="' + c._anchorId + '-note-resolved"> Marcar como revisado</label>' +
+      '<span class="dq-save-state" id="' + c._anchorId + '-note-savestate"></span>' +
+      '<button type="button" class="clear-answer-btn" id="' + c._anchorId + '-note-download">Descargar este comentario</button>' +
+      '<button type="button" class="clear-answer-btn" id="' + c._anchorId + '-note-clear">Borrar comentario</button>' +
+    '</div>' +
+  '</div>';
+
+  if(c.decision_question_id){
+    html += renderRelatedPending(c);
+  }
+
+  html += renderDetailToggle(c);
+  html += renderAntecedente(c.antecedente);
+
+  html += '</div>';
+  return html;
+}
+
+// Looks up the full pending question text from metadata.decision_questions_summary
+// (via the already-built combined DQ index) so it never needs to be duplicated
+// inside changes[]. Falls back to just the ID if the question can't be resolved
+// (e.g. decision_question_id points to a DQ that isn't declared in metadata).
+function renderRelatedPending(c){
+  const dq = DQ_INDEX[c._sourceId + '::' + c.decision_question_id];
+  const anchor = dqAnchorFor(c._sourceId, c.decision_question_id);
+  let html = '<details class="dq-link">' +
+    '<summary class="dq-link-summary">' +
+      '<span class="dq-link-label">Pregunta de decisión relacionada</span>' +
+      '<span class="dq-link-id">' + escapeHtml(c.decision_question_id) + '</span>' +
+    '</summary>' +
+    '<div class="dq-link-body">';
+  if(dq && dq.question){
+    html += '<div class="dq-link-question">' + escapeHtml(dq.question) + '</div>';
+  }else{
+    html += '<div class="dq-link-question" style="font-style:italic;font-weight:400;color:var(--ink-faint);">Sin texto de pregunta cargado en el JSON para esta pregunta de decisión.</div>';
+  }
+  html += '<a class="dq-link-jump" href="#' + anchor + '">Ver en Preguntas de decisión →</a>';
+  html += '</div></details>';
+  return html;
+}
+
+function renderComparison(c){
+  if(c.action === 'replace_exact' || c.action === 'replace_block'){
+    if(c.action === 'replace_block'){
+      let html = '';
+      html += '<div class="block-box actual"><div class="lbl">Actual</div>' + renderMarkdown(c.current_text) + '</div>';
+      html += '<div class="block-box proposed"><div class="lbl">Propuesto</div>' + renderMarkdown(c.replacement_text) + '</div>';
+      return html;
+    }
+    return '<div class="compare">' +
+      '<div class="box actual"><div class="lbl">Actual</div>' + renderMarkdown(c.current_text) + '</div>' +
+      '<div class="box proposed"><div class="lbl">Propuesto</div>' + renderMarkdown(c.replacement_text) + '</div>' +
+      '</div>';
+  }
+  if(c.action === 'delete'){
+    let html = '';
+    if(c.current_text) html += '<div class="block-box actual"><div class="lbl">Actual</div>' + renderMarkdown(c.current_text) + '</div>';
+    html += '<div class="delete-flag">Acción: eliminar</div>';
+    return html;
+  }
+  if(c.action === 'manual_review'){
+    let html = '<div class="manual-flag">Pendiente de revisión</div>';
+    if(c.current_text) html += '<div class="block-box actual"><div class="lbl">Actual</div>' + renderMarkdown(c.current_text) + '</div>';
+    return html;
+  }
+  if(c.action === 'skip'){
+    return '<div class="skip-flag">Revisado — no modificar</div>';
+  }
+  // unknown action: show whatever text is available, no invention
+  let html = '';
+  if(c.current_text) html += '<div class="block-box actual"><div class="lbl">Actual</div>' + renderMarkdown(c.current_text) + '</div>';
+  if(c.replacement_text) html += '<div class="block-box proposed"><div class="lbl">Propuesto</div>' + renderMarkdown(c.replacement_text) + '</div>';
+  return html;
+}
+
+function renderDetailToggle(c){
+  const rows = [];
+  rows.push(renderField('Motivo', c.reason, {markdown:true}));
+  rows.push(renderField('Qué se conserva', c.que_se_conserva, {markdown:true}));
+  rows.push(renderField('Impacto / tema relacionado', c.impacto_o_tema_relacionado, {markdown:true}));
+  rows.push(renderField('Nota de revisión', c.review_note, {markdown:true}));
+  rows.push(renderField('Fuente de la decisión', c.decision_source, {markdown:true}));
+  rows.push(renderField('Bloque diferido', c.bloque_diferido));
+  rows.push(renderField('Estado', c.estado));
+  rows.push(renderField('Estado final vs. Maestro', c.final_master_status));
+  rows.push(renderField('Archivo de origen', c.source_file));
+  // md_line is informational only. Document edits can shift line numbers.
+  // section is the canonical human-readable locator (shown above, always);
+  // md_line is kept only as a secondary technical reference, never as a
+  // fallback location and never used if section is missing.
+  if(c.md_line !== null) rows.push(renderField('Referencia técnica original', 'línea ' + c.md_line));
+  const content = rows.filter(Boolean).join('');
+  if(!content) return '';
+  return '<details class="collapsible detail-toggle"><summary>Ver motivo y detalle</summary><div class="collapsible-body">' + content + '</div></details>';
+}
+
+// antecedente comes in two shapes across different batches of this JSON:
+// a plain string (a free-form narrative on why the term was used and why
+// it's being reconsidered now), or an object with structured sub-fields
+// (introduced_in_version / introduced_context / original_rationale /
+// source). Both are supported without requiring either shape to change.
+function renderAntecedente(ant){
+  if(!ant) return '';
+
+  if(typeof ant === 'string'){
+    if(!ant.trim()) return '';
+    return '<details class="collapsible antecedente"><summary>Antecedente / origen de esta definición</summary><div class="collapsible-body">' + renderMarkdown(ant) + '</div></details>';
+  }
+
+  if(typeof ant === 'object'){
+    const fields = [
+      renderField('Introducido en versión', ant.introduced_in_version),
+      renderField('Contexto de introducción', ant.introduced_context, {markdown:true}),
+      renderField('Justificación original', ant.original_rationale, {markdown:true}),
+      renderField('Fuente', ant.source)
+    ].filter(Boolean).join('');
+    if(!fields) return '';
+    return '<details class="collapsible antecedente"><summary>Antecedente / origen de esta definición</summary><div class="collapsible-body">' + fields + '</div></details>';
+  }
+
+  return '';
+}
+
+/* =========================================================
+   NAVIGATION
+   ========================================================= */
+document.getElementById('nav-groups-toggle').addEventListener('click', function(e){
+  e.preventDefault();
+  document.getElementById('nav-groups').classList.toggle('open');
+});
+document.addEventListener('click', function(e){
+  const wrap = document.getElementById('nav-groups');
+  if(!wrap.contains(e.target)) wrap.classList.remove('open');
+});
+// The top search box does double duty: an exact ID always jumps straight to
+// that finding; anything else is applied as the same free-text filter used
+// in the Filtros panel (matches id, concept, section, current/replacement
+// text and reason), so searching by a term narrows the list live.
+const navSearchInput = document.getElementById('nav-search');
+navSearchInput.addEventListener('input', debounce(function(){
+  const raw = navSearchInput.value.trim();
+  ACTIVE_FILTERS.text = raw;
+  const filtersTextInput = document.querySelector('#filters-grid input[data-filter="text"]');
+  if(filtersTextInput) filtersTextInput.value = raw;
+  applyFilters();
+}, 300));
+
+navSearchInput.addEventListener('keydown', function(e){
+  if(e.key !== 'Enter') return;
+  const raw = this.value.trim();
+  if(!raw) return;
+  const exactMatch = Array.from(document.querySelectorAll('.change')).find(function(el){
+    return el.getAttribute('data-raw-id') === raw;
+  });
+  if(exactMatch){
+    exactMatch.classList.remove('hidden-by-filter');
+    if(exactMatch.scrollIntoView) exactMatch.scrollIntoView({behavior:'smooth', block:'start'});
+    exactMatch.style.outline = '2px solid var(--accent)';
+    setTimeout(function(){ exactMatch.style.outline = ''; }, 1600);
+    return;
+  }
+  // no exact ID: the input event above already filtered the list by term —
+  // just scroll to the first visible result.
+  const firstVisible = document.querySelector('#groups-container .change:not(.hidden-by-filter)');
+  if(firstVisible){
+    if(firstVisible.scrollIntoView) firstVisible.scrollIntoView({behavior:'smooth', block:'start'});
+    firstVisible.style.outline = '2px solid var(--accent)';
+    setTimeout(function(){ firstVisible.style.outline = ''; }, 1600);
+  }
+});
+
+/* =========================================================
+   PRINT
+   ========================================================= */
+document.getElementById('print-btn').addEventListener('click', function(){
+  document.querySelectorAll('details.collapsible, details.dq-panel-details, details.dq-link').forEach(function(d){ d.setAttribute('data-was-open', d.open ? '1' : '0'); d.open = true; });
+  window.print();
+  setTimeout(function(){
+    document.querySelectorAll('details.collapsible, details.dq-panel-details, details.dq-link').forEach(function(d){ d.open = (d.getAttribute('data-was-open') === '1'); });
+  }, 300);
+});
+
+/* =========================================================
+   UPLOAD WIRING
+   ========================================================= */
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('file-input');
+
+dropzone.addEventListener('click', function(){ fileInput.click(); });
+fileInput.addEventListener('change', function(e){
+  if(e.target.files && e.target.files.length) handleFiles(e.target.files);
+});
+['dragenter','dragover'].forEach(function(evt){
+  dropzone.addEventListener(evt, function(e){
+    e.preventDefault(); e.stopPropagation();
+    dropzone.classList.add('drag-over');
+  });
+});
+['dragleave','drop'].forEach(function(evt){
+  dropzone.addEventListener(evt, function(e){
+    e.preventDefault(); e.stopPropagation();
+    dropzone.classList.remove('drag-over');
+  });
+});
+dropzone.addEventListener('drop', function(e){
+  if(e.dataTransfer.files && e.dataTransfer.files.length) handleFiles(e.dataTransfer.files);
+});
+
+document.getElementById('clear-filters').addEventListener('click', resetFilters);
+document.getElementById('export-md-btn').addEventListener('click', exportAnswersMarkdown);
+document.getElementById('export-json-btn').addEventListener('click', exportAnswersJSON);
+document.getElementById('dq-hide-resolved-toggle').addEventListener('change', function(e){
+  document.getElementById('dq-list').classList.toggle('hide-resolved', e.target.checked);
+});
+document.getElementById('export-notes-md-btn').addEventListener('click', exportFindingNotesMarkdown);
+document.getElementById('export-notes-json-btn').addEventListener('click', exportFindingNotesJSON);
+</script>
+</body>
+</html>
