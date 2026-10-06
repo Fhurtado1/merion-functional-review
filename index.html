@@ -288,6 +288,40 @@ input[type=file]{ display:none; }
 .groups-toolbar.visible{ display:flex; }
 #finding-notes-count{ font-size:0.84rem; color:var(--ink-soft); font-weight:600; }
 
+.review-import-box{ margin-top:14px; padding:14px 16px; border:1px solid var(--line); border-radius:9px; background:#F8FAFC; }
+.review-import-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+.review-import-copy{ min-width:240px; flex:1; }
+.review-import-title{ font-size:0.86rem; font-weight:700; color:var(--ink); margin-bottom:2px; }
+.review-import-hint{ font-size:0.78rem; color:var(--ink-faint); line-height:1.45; }
+.review-import-btn{ border:1px solid var(--accent); background:var(--paper); color:var(--accent); border-radius:7px; padding:8px 12px; cursor:pointer; font-family:inherit; font-size:0.8rem; font-weight:700; }
+.review-import-btn:hover{ background:var(--accent-soft); }
+.review-import-status{ margin-top:9px; font-size:0.8rem; color:var(--ink-soft); display:none; }
+.review-import-status.visible{ display:block; }
+.review-import-status.error{ color:var(--red-fg); }
+.review-import-status.success{ color:var(--green-fg); }
+.reviewer-box{ margin-top:14px; padding:14px 16px; border:1px solid var(--blue-bd); border-radius:9px; background:var(--blue-bg); }
+.reviewer-row{ display:flex; align-items:flex-end; gap:12px; flex-wrap:wrap; }
+.reviewer-field{ min-width:210px; }
+.reviewer-field label{ display:block; font-size:0.7rem; font-weight:800; text-transform:uppercase; letter-spacing:.4px; color:var(--blue-fg); margin-bottom:5px; }
+.reviewer-field select,.reviewer-field input{ width:100%; border:1px solid var(--blue-bd); border-radius:7px; padding:8px 10px; font-family:inherit; font-size:.84rem; background:var(--paper); color:var(--ink); }
+.reviewer-field.other{ display:none; flex:1; min-width:240px; }
+.reviewer-field.other.visible{ display:block; }
+.reviewer-help{ width:100%; font-size:.76rem; color:var(--ink-soft); margin-top:2px; }
+.reviewer-statuses{ display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+.reviewer-status-badge{ display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:999px; border:1px solid var(--line); background:var(--paper); font-size:.72rem; font-weight:700; color:var(--ink-soft); }
+.reviewer-status-badge.resolved{ border-color:var(--green-bd); color:var(--green-fg); background:var(--green-bg); }
+.reviewer-status-badge.comment{ border-color:var(--blue-bd); color:var(--blue-fg); background:var(--blue-bg); }
+.legacy-review-modal{ position:fixed; inset:0; z-index:9999; background:rgba(26,34,48,.48); display:none; align-items:center; justify-content:center; padding:20px; }
+.legacy-review-modal.visible{ display:flex; }
+.legacy-review-dialog{ width:min(520px,100%); background:var(--paper); border-radius:12px; border:1px solid var(--line); box-shadow:0 20px 60px rgba(0,0,0,.18); padding:22px; }
+.legacy-review-dialog h3{ font-size:1.05rem; margin-bottom:7px; }
+.legacy-review-dialog p{ color:var(--ink-soft); font-size:.84rem; margin-bottom:14px; }
+.legacy-review-actions{ display:flex; justify-content:flex-end; gap:8px; margin-top:16px; }
+.legacy-review-actions button{ border:1px solid var(--line); background:var(--paper); border-radius:7px; padding:8px 12px; cursor:pointer; font-family:inherit; font-weight:700; }
+.legacy-review-actions .primary{ border-color:var(--accent); background:var(--accent); color:#fff; }
+.import-review-warning{ display:none; margin-top:9px; padding:9px 11px; border-radius:7px; border:1px solid var(--orange-bd); background:var(--orange-bg); color:var(--orange-fg); font-size:0.8rem; font-weight:600; line-height:1.45; }
+.import-review-warning.visible{ display:block; }
+
 /* source tag: shown only when more than one JSON is loaded */
 .source-tag{
   display:inline-flex; align-items:center; font-size:0.68rem; font-weight:700; text-transform:uppercase;
@@ -484,8 +518,62 @@ details.detail-toggle summary::before{ color:var(--accent); }
     </div>
     <input type="file" id="file-input" accept="application/json,.json" multiple>
     <div class="files-loaded" id="files-loaded"></div>
+    <div class="reviewer-box" id="reviewer-box">
+      <div class="reviewer-row">
+        <div class="reviewer-field">
+          <label for="current-reviewer-select">Revisor actual</label>
+          <select id="current-reviewer-select">
+            <option value="">Seleccionar revisor...</option>
+            <option value="Federico">Federico</option>
+            <option value="Javier">Javier</option>
+            <option value="Franchesca">Franchesca</option>
+            <option value="Otro">Otro</option>
+          </select>
+        </div>
+        <div class="reviewer-field other" id="current-reviewer-other-wrap">
+          <label for="current-reviewer-other">Nombre del revisor</label>
+          <input type="text" id="current-reviewer-other" placeholder="Escribí el nombre">
+        </div>
+        <div class="reviewer-help">Identifica quién está trabajando ahora. Cambiarlo no modifica revisiones anteriores.</div>
+      </div>
+    </div>
+    <div class="review-import-box">
+      <div class="review-import-row">
+        <div class="review-import-copy">
+          <div class="review-import-title">Importar revisión anterior</div>
+          <div class="review-import-hint">Recupera comentarios, estados revisados y respuestas guardadas previamente. Cargá primero el JSON principal nuevo y después uno o ambos archivos exportados.</div>
+        </div>
+        <button class="review-import-btn" id="import-review-btn" type="button">Importar revisión anterior</button>
+      </div>
+      <input type="file" id="review-import-input" accept="application/json,.json" multiple>
+      <div class="review-import-status" id="review-import-status"></div>
+    </div>
     <div class="error-banner" id="error-banner"></div>
     <div class="info-banner" id="info-banner"></div>
+    <div class="legacy-review-modal" id="legacy-review-modal" aria-hidden="true">
+      <div class="legacy-review-dialog">
+        <h3>¿Quién realizó esta revisión?</h3>
+        <p>Este archivo fue generado antes de incorporar el campo <code>reviewer</code>. Elegí quién hizo esa revisión para importarla correctamente.</p>
+        <div class="reviewer-field">
+          <label for="legacy-reviewer-select">Revisor de la revisión importada</label>
+          <select id="legacy-reviewer-select">
+            <option value="">Seleccionar...</option>
+            <option value="Federico">Federico</option>
+            <option value="Javier">Javier</option>
+            <option value="Franchesca">Franchesca</option>
+            <option value="Otro">Otro</option>
+          </select>
+        </div>
+        <div class="reviewer-field other" id="legacy-reviewer-other-wrap" style="margin-top:10px;">
+          <label for="legacy-reviewer-other">Nombre del revisor</label>
+          <input type="text" id="legacy-reviewer-other" placeholder="Escribí el nombre">
+        </div>
+        <div class="legacy-review-actions">
+          <button type="button" id="legacy-review-cancel">Cancelar</button>
+          <button type="button" class="primary" id="legacy-review-confirm">Importar</button>
+        </div>
+      </div>
+    </div>
   </section>
 
   <section id="schema-section" class="panel">
@@ -629,6 +717,78 @@ details.detail-toggle summary::before{ color:var(--accent); }
    ========================================================= */
 let SOURCES = [];      // [{ sourceId, fileName, metadata, changes }]
 let sourceCounter = 0;
+
+/* =========================================================
+   REVIEWER IDENTITY
+   Current reviewer is independent from imported historical reviewers.
+   ========================================================= */
+const REVIEWER_STORAGE_KEY = 'merion_current_reviewer';
+const REVIEWER_PRESETS = ['Federico','Javier','Franchesca'];
+
+function normalizeReviewerName(value){
+  return String(value || '').trim();
+}
+function getCurrentReviewer(){
+  try{ return normalizeReviewerName(localStorage.getItem(REVIEWER_STORAGE_KEY)); }catch(e){ return ''; }
+}
+function setCurrentReviewer(name){
+  const clean = normalizeReviewerName(name);
+  try{
+    if(clean) localStorage.setItem(REVIEWER_STORAGE_KEY, clean);
+    else localStorage.removeItem(REVIEWER_STORAGE_KEY);
+  }catch(e){}
+  return clean;
+}
+function currentReviewerFromControls(){
+  const select = document.getElementById('current-reviewer-select');
+  const other = document.getElementById('current-reviewer-other');
+  if(!select) return getCurrentReviewer();
+  return normalizeReviewerName(select.value === 'Otro' ? (other ? other.value : '') : select.value);
+}
+function ensureCurrentReviewer(){
+  const reviewer = currentReviewerFromControls() || getCurrentReviewer();
+  if(!reviewer){
+    alert('Seleccioná el Revisor actual antes de guardar una revisión o comentario.');
+    const select = document.getElementById('current-reviewer-select');
+    if(select) select.focus();
+    return '';
+  }
+  setCurrentReviewer(reviewer);
+  return reviewer;
+}
+function initReviewerControls(){
+  const select = document.getElementById('current-reviewer-select');
+  const otherWrap = document.getElementById('current-reviewer-other-wrap');
+  const other = document.getElementById('current-reviewer-other');
+  if(!select || !otherWrap || !other) return;
+  const saved = getCurrentReviewer();
+  if(saved){
+    if(REVIEWER_PRESETS.includes(saved)){ select.value = saved; }
+    else{ select.value = 'Otro'; other.value = saved; otherWrap.classList.add('visible'); }
+  }
+  const sync = function(){
+    otherWrap.classList.toggle('visible', select.value === 'Otro');
+    const value = normalizeReviewerName(select.value === 'Otro' ? other.value : select.value);
+    setCurrentReviewer(value);
+    if(SOURCES.length) rebuildReport();
+  };
+  select.addEventListener('change', sync);
+  other.addEventListener('change', sync);
+  other.addEventListener('blur', sync);
+}
+
+function reviewerKeyPart(reviewer){ return encodeURIComponent(normalizeReviewerName(reviewer)); }
+function getStorageKeysWithPrefix(prefix){
+  const keys = [];
+  try{
+    for(let i=0;i<localStorage.length;i++){
+      const k = localStorage.key(i);
+      if(k && k.indexOf(prefix) === 0) keys.push(k);
+    }
+  }catch(e){}
+  return keys;
+}
+
 
 function readFileAsText(file){
   return new Promise(function(resolve, reject){
@@ -983,9 +1143,9 @@ function matchesFilters(c){
   if(ACTIVE_FILTERS.decision_question && c.decision_question_id !== ACTIVE_FILTERS.decision_question) return false;
   if(ACTIVE_FILTERS.source && c._sourceId !== ACTIVE_FILTERS.source) return false;
   if(ACTIVE_FILTERS.follow_up){
-    const stored = loadFindingNote(c._sourceLabel, c.id);
-    const hasComment = !!(stored.note && stored.note.trim() !== '');
-    const isReviewed = !!stored.resolved;
+    const reviews = getAllFindingReviews(c._sourceLabel, c.id);
+    const hasComment = reviews.some(function(stored){ return !!(stored.note && stored.note.trim() !== ''); });
+    const isReviewed = reviews.some(function(stored){ return !!stored.resolved; });
     if(ACTIVE_FILTERS.follow_up === 'reviewed' && !isReviewed) return false;
     if(ACTIVE_FILTERS.follow_up === 'not_reviewed' && isReviewed) return false;
     if(ACTIVE_FILTERS.follow_up === 'with_comment' && !hasComment) return false;
@@ -1407,68 +1567,70 @@ function renderField(label, value, opts){
 let CURRENT_DQ_ENTRIES = [];
 let DQ_INDEX = {};
 
-function answerStorageKey(bloque, dqId){
-  return 'merion_dq_answer::' + cssSafe(bloque) + '::' + cssSafe(dqId);
+function answerStoragePrefix(bloque, dqId){
+  return 'merion_dq_answer::' + cssSafe(bloque) + '::' + cssSafe(dqId) + '::';
 }
-function loadAnswer(bloque, dqId){
+function answerStorageKey(bloque, dqId, reviewer){
+  return answerStoragePrefix(bloque, dqId) + reviewerKeyPart(reviewer);
+}
+function loadAnswer(bloque, dqId, reviewer){
+  reviewer = normalizeReviewerName(reviewer || getCurrentReviewer());
+  if(!reviewer) return { answer:'', resolved:false, updatedAt:null, reviewer:'' };
   try{
-    const raw = localStorage.getItem(answerStorageKey(bloque, dqId));
-    if(!raw) return { answer:'', resolved:false, updatedAt:null };
+    const raw = localStorage.getItem(answerStorageKey(bloque, dqId, reviewer));
+    if(!raw) return { answer:'', resolved:false, updatedAt:null, reviewer:reviewer };
     const parsed = JSON.parse(raw);
-    return {
-      answer: parsed.answer || '',
-      resolved: !!parsed.resolved,
-      updatedAt: parsed.updatedAt || null
-    };
-  }catch(e){
-    return { answer:'', resolved:false, updatedAt:null };
-  }
+    return { answer: parsed.answer || '', resolved: !!parsed.resolved, updatedAt: parsed.updatedAt || null, reviewer: parsed.reviewer || reviewer };
+  }catch(e){ return { answer:'', resolved:false, updatedAt:null, reviewer:reviewer }; }
 }
-function saveAnswer(bloque, dqId, data){
-  try{
-    localStorage.setItem(answerStorageKey(bloque, dqId), JSON.stringify(data));
-    return true;
-  }catch(e){
-    return false;
-  }
+function saveAnswer(bloque, dqId, reviewer, data){
+  reviewer = normalizeReviewerName(reviewer);
+  if(!reviewer) return false;
+  try{ localStorage.setItem(answerStorageKey(bloque, dqId, reviewer), JSON.stringify(Object.assign({}, data, {reviewer:reviewer}))); return true; }catch(e){ return false; }
 }
-function deleteAnswer(bloque, dqId){
-  try{
-    localStorage.removeItem(answerStorageKey(bloque, dqId));
-    return true;
-  }catch(e){
-    return false;
-  }
+function deleteAnswer(bloque, dqId, reviewer){
+  reviewer = normalizeReviewerName(reviewer || getCurrentReviewer());
+  if(!reviewer) return false;
+  try{ localStorage.removeItem(answerStorageKey(bloque, dqId, reviewer)); return true; }catch(e){ return false; }
+}
+function getAllDQAnswerReviews(bloque, dqId){
+  const prefix = answerStoragePrefix(bloque, dqId);
+  return getStorageKeysWithPrefix(prefix).map(function(k){
+    try{ const d=JSON.parse(localStorage.getItem(k)); return Object.assign({}, d, {reviewer: normalizeReviewerName(d.reviewer || decodeURIComponent(k.slice(prefix.length))) }); }catch(e){ return null; }
+  }).filter(Boolean);
 }
 
-function dqCommentStorageKey(bloque, dqId){
-  return 'merion_dq_comment::' + cssSafe(bloque) + '::' + cssSafe(dqId);
+function dqCommentStoragePrefix(bloque, dqId){
+  return 'merion_dq_comment::' + cssSafe(bloque) + '::' + cssSafe(dqId) + '::';
 }
-function loadDQComment(bloque, dqId){
+function dqCommentStorageKey(bloque, dqId, reviewer){
+  return dqCommentStoragePrefix(bloque, dqId) + reviewerKeyPart(reviewer);
+}
+function loadDQComment(bloque, dqId, reviewer){
+  reviewer = normalizeReviewerName(reviewer || getCurrentReviewer());
+  if(!reviewer) return { comment:'', updatedAt:null, reviewer:'' };
   try{
-    const raw = localStorage.getItem(dqCommentStorageKey(bloque, dqId));
-    if(!raw) return { comment:'', updatedAt:null };
+    const raw = localStorage.getItem(dqCommentStorageKey(bloque, dqId, reviewer));
+    if(!raw) return { comment:'', updatedAt:null, reviewer:reviewer };
     const parsed = JSON.parse(raw);
-    return { comment: parsed.comment || '', updatedAt: parsed.updatedAt || null };
-  }catch(e){
-    return { comment:'', updatedAt:null };
-  }
+    return { comment: parsed.comment || '', updatedAt: parsed.updatedAt || null, reviewer: parsed.reviewer || reviewer };
+  }catch(e){ return { comment:'', updatedAt:null, reviewer:reviewer }; }
 }
-function saveDQComment(bloque, dqId, data){
-  try{
-    localStorage.setItem(dqCommentStorageKey(bloque, dqId), JSON.stringify(data));
-    return true;
-  }catch(e){
-    return false;
-  }
+function saveDQComment(bloque, dqId, reviewer, data){
+  reviewer = normalizeReviewerName(reviewer);
+  if(!reviewer) return false;
+  try{ localStorage.setItem(dqCommentStorageKey(bloque, dqId, reviewer), JSON.stringify(Object.assign({}, data, {reviewer:reviewer}))); return true; }catch(e){ return false; }
 }
-function deleteDQComment(bloque, dqId){
-  try{
-    localStorage.removeItem(dqCommentStorageKey(bloque, dqId));
-    return true;
-  }catch(e){
-    return false;
-  }
+function deleteDQComment(bloque, dqId, reviewer){
+  reviewer = normalizeReviewerName(reviewer || getCurrentReviewer());
+  if(!reviewer) return false;
+  try{ localStorage.removeItem(dqCommentStorageKey(bloque, dqId, reviewer)); return true; }catch(e){ return false; }
+}
+function getAllDQCommentReviews(bloque, dqId){
+  const prefix = dqCommentStoragePrefix(bloque, dqId);
+  return getStorageKeysWithPrefix(prefix).map(function(k){
+    try{ const d=JSON.parse(localStorage.getItem(k)); return Object.assign({}, d, {reviewer: normalizeReviewerName(d.reviewer || decodeURIComponent(k.slice(prefix.length))) }); }catch(e){ return null; }
+  }).filter(Boolean);
 }
 
 function debounce(fn, wait){
@@ -1495,7 +1657,7 @@ function updateAnsweredCount(){
   let resolved = 0;
   let answeredPending = 0;
   CURRENT_DQ_ENTRIES.forEach(function(dq){
-    const stored = loadAnswer(dq._sourceLabel, dq.dqId);
+    const stored = loadAnswer(dq._sourceLabel, dq.dqId, getCurrentReviewer());
     const isResolved = isDQEffectivelyResolved(dq, stored);
     if(isResolved){
       resolved++;
@@ -1538,14 +1700,16 @@ function attachDQAnswerHandlers(dqEntries){
     const clearBtn = document.getElementById(clearId);
     if(!textarea || !checkbox || !saveState) return;
 
-    const stored = loadAnswer(dq._sourceLabel, dq.dqId);
+    const stored = loadAnswer(dq._sourceLabel, dq.dqId, getCurrentReviewer());
     textarea.value = dqEffectiveAnswer(dq, stored);
     checkbox.checked = !!stored.resolved;
     saveState.textContent = stored.updatedAt ? ('Guardado · ' + formatTime(stored.updatedAt)) : '';
 
     const doSave = function(){
-      const data = { answer: textarea.value, resolved: checkbox.checked, updatedAt: new Date().toISOString() };
-      const ok = saveAnswer(dq._sourceLabel, dq.dqId, data);
+      const reviewer = ensureCurrentReviewer();
+      if(!reviewer){ checkbox.checked = !!loadAnswer(dq._sourceLabel, dq.dqId, getCurrentReviewer()).resolved; return; }
+      const data = { answer: textarea.value, resolved: checkbox.checked, updatedAt: new Date().toISOString(), reviewer: reviewer };
+      const ok = saveAnswer(dq._sourceLabel, dq.dqId, reviewer, data);
       saveState.textContent = ok ? ('Guardado · ' + formatTime(data.updatedAt)) : 'No se pudo guardar en este navegador.';
       updateResolvedVisual(dq._anchorId, checkbox.checked);
       updateAnsweredCount();
@@ -1559,7 +1723,7 @@ function attachDQAnswerHandlers(dqEntries){
     checkbox.addEventListener('change', doSave);
     if(clearBtn){
       clearBtn.addEventListener('click', function(){
-        deleteAnswer(dq._sourceLabel, dq.dqId);
+        deleteAnswer(dq._sourceLabel, dq.dqId, getCurrentReviewer());
         textarea.value = '';
         checkbox.checked = false;
         saveState.textContent = '';
@@ -1580,13 +1744,15 @@ function attachDQCommentHandlers(dqEntries){
     const clearBtn = document.getElementById(clearId);
     if(!textarea || !saveState) return;
 
-    const stored = loadDQComment(dq._sourceLabel, dq.dqId);
+    const stored = loadDQComment(dq._sourceLabel, dq.dqId, getCurrentReviewer());
     textarea.value = stored.comment || '';
     saveState.textContent = stored.updatedAt ? ('Guardado · ' + formatTime(stored.updatedAt)) : '';
 
     const doSave = function(){
-      const data = { comment: textarea.value, updatedAt: new Date().toISOString() };
-      const ok = saveDQComment(dq._sourceLabel, dq.dqId, data);
+      const reviewer = ensureCurrentReviewer();
+      if(!reviewer) return;
+      const data = { comment: textarea.value, updatedAt: new Date().toISOString(), reviewer: reviewer };
+      const ok = saveDQComment(dq._sourceLabel, dq.dqId, reviewer, data);
       saveState.textContent = ok ? ('Guardado · ' + formatTime(data.updatedAt)) : 'No se pudo guardar en este navegador.';
     };
     const debouncedSave = debounce(doSave, 500);
@@ -1598,7 +1764,7 @@ function attachDQCommentHandlers(dqEntries){
 
     if(clearBtn){
       clearBtn.addEventListener('click', function(){
-        deleteDQComment(dq._sourceLabel, dq.dqId);
+        deleteDQComment(dq._sourceLabel, dq.dqId, getCurrentReviewer());
         textarea.value = '';
         saveState.textContent = '';
       });
@@ -1608,23 +1774,24 @@ function attachDQCommentHandlers(dqEntries){
 
 function collectAnswersForExport(){
   const combined = buildCombinedView(SOURCES);
-  return combined.dqEntries.map(function(dq){
-    const stored = loadAnswer(dq._sourceLabel, dq.dqId);
-    const extraComment = loadDQComment(dq._sourceLabel, dq.dqId);
-    return {
-      dq_id: dq.dqId,
-      bloque: dq._sourceLabel,
-      status_original: dq.status,
-      sub_bloque: dq.subBloque,
-      question: dq.question,
-      affected_ids: dq.affected_ids,
-      answer: dqEffectiveAnswer(dq, stored),
-      resolved: isDQEffectivelyResolved(dq, stored),
-      updated_at: stored.updatedAt || null,
-      review_comment: extraComment.comment || '',
-      review_comment_updated_at: extraComment.updatedAt || null
-    };
+  const out = [];
+  combined.dqEntries.forEach(function(dq){
+    const answers = getAllDQAnswerReviews(dq._sourceLabel, dq.dqId);
+    const comments = getAllDQCommentReviews(dq._sourceLabel, dq.dqId);
+    const reviewers = Array.from(new Set(answers.map(function(x){return x.reviewer;}).concat(comments.map(function(x){return x.reviewer;})))).filter(Boolean);
+    reviewers.forEach(function(reviewer){
+      const stored = loadAnswer(dq._sourceLabel, dq.dqId, reviewer);
+      const extraComment = loadDQComment(dq._sourceLabel, dq.dqId, reviewer);
+      out.push({
+        dq_id: dq.dqId, bloque: dq._sourceLabel, status_original: dq.status, sub_bloque: dq.subBloque,
+        question: dq.question, affected_ids: dq.affected_ids, answer: stored.answer || '',
+        resolved: !!stored.resolved, updated_at: stored.updatedAt || null,
+        review_comment: extraComment.comment || '', review_comment_updated_at: extraComment.updatedAt || null,
+        reviewer: reviewer
+      });
+    });
   });
+  return out;
 }
 
 function downloadFile(filename, content, mime){
@@ -1654,6 +1821,7 @@ function exportAnswersMarkdown(){
   }else{
     items.forEach(function(item){
       md += '## ' + item.dq_id + ' — ' + item.bloque + '\n\n';
+      if(item.reviewer) md += '**Revisor:** ' + item.reviewer + '\n\n';
       if(item.status_original) md += '**Status original:** ' + item.status_original + '\n\n';
       if(item.sub_bloque) md += '**Sub-bloque:** ' + item.sub_bloque + '\n\n';
       if(item.question) md += '**Pregunta:** ' + item.question + '\n\n';
@@ -1676,34 +1844,55 @@ function exportAnswersMarkdown(){
    ========================================================= */
 let CURRENT_COMMENTABLE_CHANGES = [];
 
-function noteStorageKey(bloque, id){
-  return 'merion_finding_note::' + cssSafe(bloque) + '::' + cssSafe(id);
+function noteStoragePrefix(bloque, id){
+  return 'merion_finding_note::' + cssSafe(bloque) + '::' + cssSafe(id) + '::';
 }
-function loadFindingNote(bloque, id){
+function noteStorageKey(bloque, id, reviewer){
+  return noteStoragePrefix(bloque, id) + reviewerKeyPart(reviewer);
+}
+function loadFindingNote(bloque, id, reviewer){
+  reviewer = normalizeReviewerName(reviewer || getCurrentReviewer());
+  if(!reviewer) return { note:'', resolved:false, updatedAt:null, requiresRereview:false, previousResolved:false, importedAt:null, reviewer:'' };
   try{
-    const raw = localStorage.getItem(noteStorageKey(bloque, id));
-    if(!raw) return { note:'', resolved:false, updatedAt:null };
+    const raw = localStorage.getItem(noteStorageKey(bloque, id, reviewer));
+    if(!raw) return { note:'', resolved:false, updatedAt:null, requiresRereview:false, previousResolved:false, importedAt:null, reviewer:reviewer };
     const parsed = JSON.parse(raw);
-    return { note: parsed.note || '', resolved: !!parsed.resolved, updatedAt: parsed.updatedAt || null };
-  }catch(e){
-    return { note:'', resolved:false, updatedAt:null };
-  }
+    return {
+      note: parsed.note || '', resolved: !!parsed.resolved, updatedAt: parsed.updatedAt || null,
+      requiresRereview: !!parsed.requiresRereview, previousResolved: !!parsed.previousResolved,
+      importedAt: parsed.importedAt || null, reviewer: parsed.reviewer || reviewer
+    };
+  }catch(e){ return { note:'', resolved:false, updatedAt:null, requiresRereview:false, previousResolved:false, importedAt:null, reviewer:reviewer }; }
 }
-function saveFindingNote(bloque, id, data){
-  try{
-    localStorage.setItem(noteStorageKey(bloque, id), JSON.stringify(data));
-    return true;
-  }catch(e){
-    return false;
-  }
+function saveFindingNote(bloque, id, reviewer, data){
+  reviewer = normalizeReviewerName(reviewer);
+  if(!reviewer) return false;
+  try{ localStorage.setItem(noteStorageKey(bloque, id, reviewer), JSON.stringify(Object.assign({}, data, {reviewer:reviewer}))); return true; }catch(e){ return false; }
 }
-function deleteFindingNote(bloque, id){
-  try{
-    localStorage.removeItem(noteStorageKey(bloque, id));
-    return true;
-  }catch(e){
-    return false;
-  }
+function deleteFindingNote(bloque, id, reviewer){
+  reviewer = normalizeReviewerName(reviewer || getCurrentReviewer());
+  if(!reviewer) return false;
+  try{ localStorage.removeItem(noteStorageKey(bloque, id, reviewer)); return true; }catch(e){ return false; }
+}
+function getAllFindingReviews(bloque, id){
+  const prefix = noteStoragePrefix(bloque, id);
+  return getStorageKeysWithPrefix(prefix).map(function(k){
+    try{ const d=JSON.parse(localStorage.getItem(k)); return Object.assign({}, d, {reviewer: normalizeReviewerName(d.reviewer || decodeURIComponent(k.slice(prefix.length))) }); }catch(e){ return null; }
+  }).filter(Boolean);
+}
+
+function reviewerBadgesHTML(reviews, type){
+  return reviews.filter(function(r){
+    return type === 'finding' ? ((r.note && r.note.trim()) || r.resolved || r.requiresRereview) : ((r.answer && r.answer.trim()) || r.resolved || (r.comment && r.comment.trim()));
+  }).map(function(r){
+    const resolved = !!r.resolved;
+    const hasText = !!((r.note && r.note.trim()) || (r.answer && r.answer.trim()) || (r.comment && r.comment.trim()));
+    let label = escapeHtml(r.reviewer || 'Sin revisor');
+    if(resolved) label += ' ✓ Revisado';
+    else if(r.requiresRereview) label += ' · Requiere nueva revisión';
+    else if(hasText) label += ' · Con comentario';
+    return '<span class="reviewer-status-badge ' + (resolved ? 'resolved' : (hasText ? 'comment' : '')) + '">' + label + '</span>';
+  }).join('');
 }
 
 function updateFindingNotesCount(allChanges){
@@ -1711,8 +1900,8 @@ function updateFindingNotesCount(allChanges){
   if(!el) return;
   let withNotes = 0;
   allChanges.forEach(function(c){
-    const stored = loadFindingNote(c._sourceLabel, c.id);
-    if(stored.note && stored.note.trim() !== '') withNotes++;
+    const reviews = getAllFindingReviews(c._sourceLabel, c.id);
+    if(reviews.some(function(r){ return r.note && r.note.trim() !== ''; })) withNotes++;
   });
   el.textContent = withNotes + ' de ' + allChanges.length + ' hallazgos con comentario';
 }
@@ -1747,17 +1936,30 @@ function attachFindingNoteHandlers(allChanges){
     const saveState = document.getElementById(stId);
     const clearBtn = document.getElementById(clearId);
     const downloadBtn = document.getElementById(downloadId);
+    const importWarning = document.getElementById(c._anchorId + '-import-warning');
     if(!textarea || !checkbox || !saveState) return;
 
-    const stored = loadFindingNote(c._sourceLabel, c.id);
+    const stored = loadFindingNote(c._sourceLabel, c.id, getCurrentReviewer());
     textarea.value = stored.note || '';
     checkbox.checked = !!stored.resolved;
     saveState.textContent = stored.updatedAt ? ('Guardado · ' + formatTime(stored.updatedAt)) : '';
+    if(importWarning) importWarning.classList.toggle('visible', !!stored.requiresRereview);
 
     const doSave = function(){
-      const data = { note: textarea.value, resolved: checkbox.checked, updatedAt: new Date().toISOString() };
-      const ok = saveFindingNote(c._sourceLabel, c.id, data);
+      const reviewer = ensureCurrentReviewer();
+      if(!reviewer){ checkbox.checked = !!loadFindingNote(c._sourceLabel, c.id, getCurrentReviewer()).resolved; return; }
+      const previous = loadFindingNote(c._sourceLabel, c.id, reviewer);
+      const data = {
+        note: textarea.value,
+        resolved: checkbox.checked,
+        updatedAt: new Date().toISOString(),
+        requiresRereview: checkbox.checked ? false : !!previous.requiresRereview,
+        previousResolved: checkbox.checked ? false : !!previous.previousResolved,
+        importedAt: previous.importedAt || null
+      };
+      const ok = saveFindingNote(c._sourceLabel, c.id, reviewer, Object.assign({}, data, {reviewer:reviewer}));
       saveState.textContent = ok ? ('Guardado · ' + formatTime(data.updatedAt)) : 'No se pudo guardar en este navegador.';
+      if(importWarning) importWarning.classList.toggle('visible', !!data.requiresRereview);
       updateFindingNotesCount(allChanges);
       // Si hay un filtro de seguimiento activo, refrescar la lista inmediatamente
       // al marcar como revisado o al agregar/quitar un comentario.
@@ -1772,10 +1974,11 @@ function attachFindingNoteHandlers(allChanges){
     checkbox.addEventListener('change', doSave);
     if(clearBtn){
       clearBtn.addEventListener('click', function(){
-        deleteFindingNote(c._sourceLabel, c.id);
+        deleteFindingNote(c._sourceLabel, c.id, getCurrentReviewer());
         textarea.value = '';
         checkbox.checked = false;
         saveState.textContent = '';
+        if(importWarning) importWarning.classList.remove('visible');
         updateFindingNotesCount(allChanges);
         if(ACTIVE_FILTERS.follow_up) applyFilters();
       });
@@ -1792,27 +1995,20 @@ function attachFindingNoteHandlers(allChanges){
 
 function collectFindingNotesForExport(){
   const combined = buildCombinedView(SOURCES);
-  return combined.changes
-    .map(function(c){
-      const stored = loadFindingNote(c._sourceLabel, c.id);
-      return {
-        id: c.id,
-        bloque: c._sourceLabel,
-        section: c.section,
-        concept: c.concept,
-        action: c.action,
-        contexto_hallazgo: c.contexto_hallazgo || null,
-        resumen_cambio: c.resumen_cambio || null,
-        current_text: c.current_text || null,
-        replacement_text: c.replacement_text || null,
-        reason: c.reason,
-        decision_question_id: c.decision_question_id || null,
-        note: stored.note || '',
-        resolved: !!stored.resolved,
-        updated_at: stored.updatedAt || null
-      };
-    })
-    .filter(function(item){ return (item.note && item.note.trim() !== '') || item.resolved; });
+  const out = [];
+  combined.changes.forEach(function(c){
+    getAllFindingReviews(c._sourceLabel, c.id).forEach(function(stored){
+      if(!((stored.note && stored.note.trim() !== '') || stored.resolved || stored.requiresRereview)) return;
+      out.push({
+        id:c.id, bloque:c._sourceLabel, section:c.section, concept:c.concept, action:c.action,
+        contexto_hallazgo:c.contexto_hallazgo || null, resumen_cambio:c.resumen_cambio || null,
+        current_text:c.current_text || null, replacement_text:c.replacement_text || null, reason:c.reason,
+        decision_question_id:c.decision_question_id || null, note:stored.note || '', resolved:!!stored.resolved,
+        updated_at:stored.updatedAt || null, reviewer:stored.reviewer || ''
+      });
+    });
+  });
+  return out;
 }
 
 function exportFindingNotesJSON(){
@@ -1840,11 +2036,148 @@ function exportFindingNotesMarkdown(){
       if(item.reason) md += '**Motivo original:** ' + item.reason + '\n\n';
       if(item.decision_question_id) md += '**Pregunta de decisión relacionada:** ' + item.decision_question_id + '\n\n';
       md += '**Comentario:** ' + (item.note.trim() ? item.note.trim() : '_Sin texto, solo marcado como revisado._') + '\n\n';
+      if(item.reviewer) md += '**Revisor:** ' + item.reviewer + '\n\n';
       md += '**Marcado como revisado:** ' + (item.resolved ? 'Sí' : 'No') + '\n\n';
       md += '---\n\n';
     });
   }
   downloadFile('comentarios-hallazgos.md', md, 'text/markdown');
+}
+
+/* =========================================================
+   IMPORT PREVIOUS REVIEW
+   Restores exported review data into the exact same localStorage
+   keys already used by this viewer. The main metadata + changes
+   JSON remains untouched.
+   ========================================================= */
+function reviewImportStatus(message, type){
+  const el = document.getElementById('review-import-status');
+  if(!el) return;
+  el.textContent = message || '';
+  el.className = 'review-import-status' + (message ? ' visible' : '') + (type ? ' ' + type : '');
+}
+
+function sameReviewField(a, b){
+  const norm = function(v){ return (v === null || v === undefined) ? '' : String(v); };
+  return norm(a) === norm(b);
+}
+
+function findCurrentChangeByBlockAndId(bloque, id){
+  const combined = buildCombinedView(SOURCES);
+  return combined.changes.find(function(c){
+    return c._sourceLabel === bloque && c.id === id;
+  }) || null;
+}
+
+function findCurrentDQByBlockAndId(bloque, dqId){
+  const combined = buildCombinedView(SOURCES);
+  return combined.dqEntries.find(function(dq){
+    return dq._sourceLabel === bloque && dq.dqId === dqId;
+  }) || null;
+}
+
+function importFindingReviewPayload(parsed, fallbackReviewer){
+  const items = Array.isArray(parsed && parsed.comentarios_hallazgos) ? parsed.comentarios_hallazgos : null;
+  if(!items) return null;
+  let imported=0, changed=0, unmatched=0;
+  items.forEach(function(item){
+    if(!item || !item.bloque || !item.id){ unmatched++; return; }
+    const current=findCurrentChangeByBlockAndId(item.bloque,item.id);
+    if(!current){ unmatched++; return; }
+    const reviewer=normalizeReviewerName(item.reviewer || fallbackReviewer);
+    if(!reviewer){ unmatched++; return; }
+    const proposalChanged=!sameReviewField(item.action,current.action)||!sameReviewField(item.current_text,current.current_text)||!sameReviewField(item.replacement_text,current.replacement_text);
+    const wasResolved=!!item.resolved;
+    const requiresRereview=wasResolved && proposalChanged;
+    saveFindingNote(item.bloque,item.id,reviewer,{
+      note:item.note||'', resolved:requiresRereview?false:wasResolved, updatedAt:item.updated_at||null,
+      requiresRereview:requiresRereview, previousResolved:requiresRereview, importedAt:new Date().toISOString(), reviewer:reviewer
+    });
+    imported++; if(requiresRereview) changed++;
+  });
+  return {type:'findings',imported:imported,changed:changed,unmatched:unmatched};
+}
+
+function importDQReviewPayload(parsed, fallbackReviewer){
+  const items=Array.isArray(parsed && parsed.decision_questions)?parsed.decision_questions:null;
+  if(!items) return null;
+  let imported=0,unmatched=0;
+  items.forEach(function(item){
+    if(!item || !item.bloque || !item.dq_id){ unmatched++; return; }
+    const current=findCurrentDQByBlockAndId(item.bloque,item.dq_id);
+    if(!current){ unmatched++; return; }
+    const reviewer=normalizeReviewerName(item.reviewer || fallbackReviewer);
+    if(!reviewer){ unmatched++; return; }
+    saveAnswer(item.bloque,item.dq_id,reviewer,{answer:item.answer||'',resolved:!!item.resolved,updatedAt:item.updated_at||null,reviewer:reviewer});
+    saveDQComment(item.bloque,item.dq_id,reviewer,{comment:item.review_comment||'',updatedAt:item.review_comment_updated_at||null,reviewer:reviewer});
+    imported++;
+  });
+  return {type:'dqs',imported:imported,changed:0,unmatched:unmatched};
+}
+
+function payloadNeedsLegacyReviewer(parsed){
+  const groups=[];
+  if(Array.isArray(parsed && parsed.comentarios_hallazgos)) groups.push(parsed.comentarios_hallazgos);
+  if(Array.isArray(parsed && parsed.decision_questions)) groups.push(parsed.decision_questions);
+  const items=[].concat.apply([],groups);
+  return items.length>0 && items.some(function(item){ return !normalizeReviewerName(item && item.reviewer); });
+}
+
+function askLegacyReviewer(fileName){
+  return new Promise(function(resolve){
+    const modal=document.getElementById('legacy-review-modal');
+    const select=document.getElementById('legacy-reviewer-select');
+    const otherWrap=document.getElementById('legacy-reviewer-other-wrap');
+    const other=document.getElementById('legacy-reviewer-other');
+    const confirmBtn=document.getElementById('legacy-review-confirm');
+    const cancelBtn=document.getElementById('legacy-review-cancel');
+    const p=modal.querySelector('p');
+    p.innerHTML='El archivo <b>'+escapeHtml(fileName)+'</b> no identifica al revisor. Elegí quién realizó esta revisión antes de importarla.';
+    select.value=''; other.value=''; otherWrap.classList.remove('visible');
+    modal.classList.add('visible'); modal.setAttribute('aria-hidden','false');
+    const cleanup=function(){
+      modal.classList.remove('visible'); modal.setAttribute('aria-hidden','true');
+      select.removeEventListener('change',onChange); confirmBtn.removeEventListener('click',onConfirm); cancelBtn.removeEventListener('click',onCancel);
+    };
+    const onChange=function(){ otherWrap.classList.toggle('visible',select.value==='Otro'); };
+    const onConfirm=function(){
+      const reviewer=normalizeReviewerName(select.value==='Otro'?other.value:select.value);
+      if(!reviewer){ alert('Seleccioná o escribí quién realizó esta revisión.'); return; }
+      cleanup(); resolve(reviewer);
+    };
+    const onCancel=function(){ cleanup(); resolve(null); };
+    select.addEventListener('change',onChange); confirmBtn.addEventListener('click',onConfirm); cancelBtn.addEventListener('click',onCancel);
+  });
+}
+
+async function handlePreviousReviewFiles(fileList){
+  const files=Array.from(fileList||[]);
+  if(!files.length) return;
+  if(!SOURCES.length){ reviewImportStatus('Primero cargá el JSON principal nuevo (metadata + changes). Después importá la revisión anterior.','error'); return; }
+  let totalImported=0,totalChanged=0,totalUnmatched=0;
+  const errors=[],recognized=[];
+  for(const file of files){
+    let parsed;
+    try{ parsed=JSON.parse(await readFileAsText(file)); }catch(e){ errors.push(file.name+': JSON inválido.'); continue; }
+    const recognizedShape=Array.isArray(parsed&&parsed.comentarios_hallazgos)||Array.isArray(parsed&&parsed.decision_questions);
+    if(!recognizedShape){ errors.push(file.name+': no parece ser comentarios-hallazgos.json ni respuestas-decision-questions.json.'); continue; }
+    let fallbackReviewer='';
+    if(payloadNeedsLegacyReviewer(parsed)){
+      fallbackReviewer=await askLegacyReviewer(file.name);
+      if(!fallbackReviewer){ errors.push(file.name+': importación cancelada porque no se indicó quién realizó la revisión.'); continue; }
+    }
+    const findingResult=importFindingReviewPayload(parsed,fallbackReviewer);
+    const dqResult=importDQReviewPayload(parsed,fallbackReviewer);
+    [findingResult,dqResult].filter(Boolean).forEach(function(result){ totalImported+=result.imported; totalChanged+=result.changed; totalUnmatched+=result.unmatched; });
+    recognized.push(file.name);
+  }
+  rebuildReport();
+  let msg=totalImported+' registros restaurados';
+  if(totalChanged) msg+=' · '+totalChanged+' revisados anteriormente requieren nueva revisión porque la propuesta cambió';
+  if(totalUnmatched) msg+=' · '+totalUnmatched+' sin coincidencia en el JSON actual';
+  if(recognized.length) msg+=' · Archivos: '+recognized.join(', ');
+  if(errors.length) msg+=' · '+errors.join(' ');
+  reviewImportStatus(msg,errors.length?'error':'success');
 }
 
 /* =========================================================
@@ -2093,7 +2426,7 @@ function renderDecisionQuestions(dqEntries){
 
   if(panelCount){
     const pendingCount = dqEntries.filter(function(dq){
-      const stored = loadAnswer(dq._sourceLabel, dq.dqId);
+      const stored = loadAnswer(dq._sourceLabel, dq.dqId, getCurrentReviewer());
       return !isDQEffectivelyResolved(dq, stored);
     }).length;
     panelCount.textContent = dqEntries.length ? '(' + pendingCount + ')' : '';
@@ -2109,7 +2442,7 @@ function renderDecisionQuestions(dqEntries){
 
   const multiSource = new Set(dqEntries.map(function(d){ return d._sourceId; })).size > 1;
   dqEntries.forEach(function(dq){
-    const stored = loadAnswer(dq._sourceLabel, dq.dqId);
+    const stored = loadAnswer(dq._sourceLabel, dq.dqId, getCurrentReviewer());
     const effectiveResolved = isDQEffectivelyResolved(dq, stored);
     const sourceResolved = isDQResolvedBySource(dq);
     const effectiveAnswer = dqEffectiveAnswer(dq, stored);
@@ -2146,6 +2479,10 @@ function renderDecisionQuestions(dqEntries){
     }
 
     html += '<div class="dq-meta">' + dq.affected_ids.length + ' hallazgo(s) relacionado(s)</div>';
+    const dqReviewerMap = {};
+    getAllDQAnswerReviews(dq._sourceLabel, dq.dqId).forEach(function(r){ dqReviewerMap[r.reviewer]=Object.assign({},dqReviewerMap[r.reviewer]||{},r); });
+    getAllDQCommentReviews(dq._sourceLabel, dq.dqId).forEach(function(r){ dqReviewerMap[r.reviewer]=Object.assign({},dqReviewerMap[r.reviewer]||{},r); });
+    html += '<div class="reviewer-statuses">' + reviewerBadgesHTML(Object.keys(dqReviewerMap).map(function(k){return dqReviewerMap[k];}), 'dq') + '</div>';
     if(dq.affected_ids.length){
       html += '<div class="dq-ids">' + dq.affected_ids.map(function(id){
         return '<a href="#' + changeAnchorFor(dq._sourceId, id) + '">' + escapeHtml(id) + '</a>';
@@ -2367,9 +2704,12 @@ function renderChange(c, showSourceTag){
 
   html += renderComparison(c);
 
+  html += '<div class="reviewer-statuses">' + reviewerBadgesHTML(getAllFindingReviews(c._sourceLabel, c.id), 'finding') + '</div>';
+
   html += '<div class="dq-answer-block">' +
     '<label class="dq-answer-label" for="' + c._anchorId + '-note">Tu comentario</label>' +
     '<textarea class="dq-answer-textarea" id="' + c._anchorId + '-note" placeholder="Escribí acá tu comentario, objeción o ajuste sobre este cambio propuesto..."></textarea>' +
+    '<div class="import-review-warning" id="' + c._anchorId + '-import-warning">Revisado anteriormente, pero esta propuesta cambió. Requiere nueva revisión.</div>' +
     '<div class="dq-answer-footer">' +
       '<label class="dq-resolved-label"><input type="checkbox" id="' + c._anchorId + '-note-resolved"> Marcar como revisado</label>' +
       '<span class="dq-save-state" id="' + c._anchorId + '-note-savestate"></span>' +
@@ -2556,6 +2896,8 @@ document.getElementById('print-btn').addEventListener('click', function(){
 /* =========================================================
    UPLOAD WIRING
    ========================================================= */
+initReviewerControls();
+
 const dropzone = document.getElementById('dropzone');
 const fileInput = document.getElementById('file-input');
 
@@ -2577,6 +2919,14 @@ fileInput.addEventListener('change', function(e){
 });
 dropzone.addEventListener('drop', function(e){
   if(e.dataTransfer.files && e.dataTransfer.files.length) handleFiles(e.dataTransfer.files);
+});
+
+const reviewImportBtn = document.getElementById('import-review-btn');
+const reviewImportInput = document.getElementById('review-import-input');
+reviewImportBtn.addEventListener('click', function(){ reviewImportInput.click(); });
+reviewImportInput.addEventListener('change', function(e){
+  if(e.target.files && e.target.files.length) handlePreviousReviewFiles(e.target.files);
+  e.target.value = '';
 });
 
 document.getElementById('clear-filters').addEventListener('click', resetFilters);
