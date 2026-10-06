@@ -961,11 +961,11 @@ function distinctValues(changes, field){
 // with "Limpiar filtros", which resets to no filters at all (see below).
 const DEFAULT_FILTERS = {
   action: '', priority: '', change_type: '', concept: '',
-  review_group: '', needs_human_review: '', decision_question: '', source: '', text: ''
+  review_group: '', needs_human_review: '', decision_question: '', source: '', follow_up: '', text: ''
 };
 let ACTIVE_FILTERS = {
   action: '', priority: '', change_type: '', concept: '',
-  review_group: '', needs_human_review: '', decision_question: '', source: '', text: ''
+  review_group: '', needs_human_review: '', decision_question: '', source: '', follow_up: '', text: ''
 };
 let filtersInitialized = false;
 
@@ -982,6 +982,17 @@ function matchesFilters(c){
   if(ACTIVE_FILTERS.needs_human_review === 'no' && c.needs_human_review) return false;
   if(ACTIVE_FILTERS.decision_question && c.decision_question_id !== ACTIVE_FILTERS.decision_question) return false;
   if(ACTIVE_FILTERS.source && c._sourceId !== ACTIVE_FILTERS.source) return false;
+  if(ACTIVE_FILTERS.follow_up){
+    const stored = loadFindingNote(c._sourceLabel, c.id);
+    const hasComment = !!(stored.note && stored.note.trim() !== '');
+    const isReviewed = !!stored.resolved;
+    if(ACTIVE_FILTERS.follow_up === 'reviewed' && !isReviewed) return false;
+    if(ACTIVE_FILTERS.follow_up === 'not_reviewed' && isReviewed) return false;
+    if(ACTIVE_FILTERS.follow_up === 'with_comment' && !hasComment) return false;
+    if(ACTIVE_FILTERS.follow_up === 'without_comment' && hasComment) return false;
+    if(ACTIVE_FILTERS.follow_up === 'reviewed_or_comment' && !(isReviewed || hasComment)) return false;
+    if(ACTIVE_FILTERS.follow_up === 'pending_clean' && (isReviewed || hasComment)) return false;
+  }
   if(ACTIVE_FILTERS.text){
     const needle = ACTIVE_FILTERS.text.toLowerCase();
     const haystack = [
@@ -1015,7 +1026,7 @@ function applyFilters(){
 function resetFilters(){
   ACTIVE_FILTERS = {
     action: '', priority: '', change_type: '', concept: '',
-    review_group: '', needs_human_review: '', decision_question: '', source: '', text: ''
+    review_group: '', needs_human_review: '', decision_question: '', source: '', follow_up: '', text: ''
   };
   document.querySelectorAll('#filters-grid select').forEach(function(s){ s.value = ''; });
   document.querySelectorAll('#filters-grid input[type=text]').forEach(function(i){ i.value = ''; });
@@ -1748,6 +1759,9 @@ function attachFindingNoteHandlers(allChanges){
       const ok = saveFindingNote(c._sourceLabel, c.id, data);
       saveState.textContent = ok ? ('Guardado · ' + formatTime(data.updatedAt)) : 'No se pudo guardar en este navegador.';
       updateFindingNotesCount(allChanges);
+      // Si hay un filtro de seguimiento activo, refrescar la lista inmediatamente
+      // al marcar como revisado o al agregar/quitar un comentario.
+      if(ACTIVE_FILTERS.follow_up) applyFilters();
     };
     const debouncedSave = debounce(doSave, 500);
 
@@ -1763,6 +1777,7 @@ function attachFindingNoteHandlers(allChanges){
         checkbox.checked = false;
         saveState.textContent = '';
         updateFindingNotesCount(allChanges);
+        if(ACTIVE_FILTERS.follow_up) applyFilters();
       });
     }
     if(downloadBtn){
@@ -2249,6 +2264,16 @@ function renderFilters(changes){
   const dqValues = available.decision_question;
   grid.innerHTML += '<div><label>Decision Question</label><select data-filter="decision_question"><option value="">Todas</option>' +
     dqValues.map(function(v){ return '<option value="' + escapeHtml(v) + '">' + escapeHtml(v) + '</option>'; }).join('') +
+    '</select></div>';
+
+  grid.innerHTML += '<div><label>Seguimiento</label><select data-filter="follow_up">' +
+    '<option value="">Todos</option>' +
+    '<option value="reviewed">Marcados como revisados</option>' +
+    '<option value="not_reviewed">No revisados</option>' +
+    '<option value="with_comment">Con comentarios</option>' +
+    '<option value="without_comment">Sin comentarios</option>' +
+    '<option value="reviewed_or_comment">Revisados o con comentarios</option>' +
+    '<option value="pending_clean">Pendientes sin comentario</option>' +
     '</select></div>';
 
   grid.innerHTML += '<div><label>Buscar (ID, texto, sección, concept)</label><input type="text" data-filter="text" placeholder="Escribí para buscar..."></div>';
