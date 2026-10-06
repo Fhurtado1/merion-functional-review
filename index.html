@@ -288,6 +288,14 @@ input[type=file]{ display:none; }
 .groups-toolbar.visible{ display:flex; }
 #finding-notes-count{ font-size:0.84rem; color:var(--ink-soft); font-weight:600; }
 
+
+.step-heading{ display:flex; align-items:center; gap:9px; margin-bottom:6px; }
+.step-badge{ width:26px; height:26px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; flex:0 0 26px; background:var(--accent); color:#fff; font-size:.78rem; font-weight:800; box-shadow:0 1px 2px rgba(20,30,50,.08); }
+.step-heading .review-import-title{ margin-bottom:0; }
+.dropzone-step{ display:flex; align-items:center; justify-content:center; gap:9px; margin-bottom:4px; }
+.dropzone-step .main{ margin-bottom:0; }
+.legacy-review-dialog .step-heading{ margin-bottom:7px; }
+
 .review-import-box{ margin-top:14px; padding:14px 16px; border:1px solid var(--line); border-radius:9px; background:#F8FAFC; }
 .review-import-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
 .review-import-copy{ min-width:240px; flex:1; }
@@ -521,7 +529,8 @@ details.detail-toggle summary::before{ color:var(--accent); }
     <h1>Informe de Revisión Funcional</h1>
     <div class="sub" id="upload-sub">Cargá uno o más archivos JSON de revisión para generar el informe. Podés seguir agregando archivos más adelante: se suman al mismo informe, no lo reemplazan.</div>
     <div class="dropzone" id="dropzone">
-      <div class="main" id="dropzone-main">Hacé clic para seleccionar uno o más archivos .json, o arrastralos aquí</div>
+      <div class="dropzone-step"><span class="step-badge">1</span><div class="main" id="dropzone-main">Cargar JSON de revisión</div></div>
+      <div class="hint" style="margin-bottom:3px;">Hacé clic para seleccionar uno o más archivos .json, o arrastralos aquí.</div>
       <div class="hint">Cada archivo debe respetar la estructura metadata / changes. Se pueden cargar varios a la vez o de a uno.</div>
     </div>
     <input type="file" id="file-input" accept="application/json,.json" multiple>
@@ -529,7 +538,7 @@ details.detail-toggle summary::before{ color:var(--accent); }
     <div class="reviewer-box" id="reviewer-box">
       <div class="reviewer-row">
         <div class="reviewer-field">
-          <label for="current-reviewer-select">Revisor actual</label>
+          <div class="step-heading"><span class="step-badge">2</span><label for="current-reviewer-select" style="margin:0;">Revisor actual</label></div>
           <select id="current-reviewer-select">
             <option value="">Seleccionar revisor...</option>
             <option value="Federico">Federico</option>
@@ -548,7 +557,7 @@ details.detail-toggle summary::before{ color:var(--accent); }
     <div class="review-import-box">
       <div class="review-import-row">
         <div class="review-import-copy">
-          <div class="review-import-title">Importar revisión anterior</div>
+          <div class="step-heading"><span class="step-badge">3</span><div class="review-import-title">Importar revisión anterior <span style="font-weight:500;color:var(--ink-faint);">(opcional)</span></div></div>
           <div class="review-import-hint">Recupera comentarios, estados revisados y respuestas guardadas previamente. Cargá primero el JSON principal nuevo y después uno o ambos archivos exportados.</div>
         </div>
         <div class="review-import-actions">
@@ -563,7 +572,7 @@ details.detail-toggle summary::before{ color:var(--accent); }
     <div class="info-banner" id="info-banner"></div>
     <div class="legacy-review-modal" id="legacy-review-modal" aria-hidden="true">
       <div class="legacy-review-dialog">
-        <h3>¿Quién realizó esta revisión?</h3>
+        <div class="step-heading"><span class="step-badge">4</span><h3 style="margin:0;">¿Quién realizó esta revisión?</h3></div>
         <p>Este archivo fue generado antes de incorporar el campo <code>reviewer</code>. Elegí quién hizo esa revisión para importarla correctamente.</p>
         <div class="reviewer-field">
           <label for="legacy-reviewer-select">Revisor de la revisión importada</label>
