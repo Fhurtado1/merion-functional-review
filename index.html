@@ -299,6 +299,14 @@ input[type=file]{ display:none; }
 .review-import-status.visible{ display:block; }
 .review-import-status.error{ color:var(--red-fg); }
 .review-import-status.success{ color:var(--green-fg); }
+.imported-review-files{ margin-top:10px; display:flex; flex-direction:column; gap:7px; }
+.imported-review-file{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:9px 10px; border:1px solid var(--line); border-radius:7px; background:var(--paper); }
+.imported-review-file .meta{ min-width:0; display:flex; flex-direction:column; gap:1px; }
+.imported-review-file .name{ font-size:0.8rem; font-weight:600; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.imported-review-file .detail{ font-size:0.73rem; color:var(--ink-faint); }
+.imported-review-file .remove{ flex:0 0 auto; border:1px solid var(--line); background:var(--paper); color:var(--red-fg); border-radius:6px; padding:5px 9px; cursor:pointer; font-family:inherit; font-size:0.74rem; font-weight:600; }
+.imported-review-file .remove:hover{ border-color:var(--red-bd); background:var(--red-bg); }
+.review-import-actions{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
 .reviewer-box{ margin-top:14px; padding:14px 16px; border:1px solid var(--blue-bd); border-radius:9px; background:var(--blue-bg); }
 .reviewer-row{ display:flex; align-items:flex-end; gap:12px; flex-wrap:wrap; }
 .reviewer-field{ min-width:210px; }
@@ -543,9 +551,12 @@ details.detail-toggle summary::before{ color:var(--accent); }
           <div class="review-import-title">Importar revisión anterior</div>
           <div class="review-import-hint">Recupera comentarios, estados revisados y respuestas guardadas previamente. Cargá primero el JSON principal nuevo y después uno o ambos archivos exportados.</div>
         </div>
-        <button class="review-import-btn" id="import-review-btn" type="button">Importar revisión anterior</button>
+        <div class="review-import-actions">
+          <button class="review-import-btn" id="import-review-btn" type="button">Agregar archivo de revisión</button>
+        </div>
       </div>
       <input type="file" id="review-import-input" accept="application/json,.json" multiple>
+      <div class="imported-review-files" id="imported-review-files"></div>
       <div class="review-import-status" id="review-import-status"></div>
     </div>
     <div class="error-banner" id="error-banner"></div>
@@ -2076,7 +2087,79 @@ function findCurrentDQByBlockAndId(bloque, dqId){
   }) || null;
 }
 
-function importFindingReviewPayload(parsed, fallbackReviewer){
+const IMPORTED_REVIEWS_STORAGE_KEY='merion_imported_review_files_v1';
+
+function loadImportedReviewFiles(){
+  try{
+    const raw=localStorage.getItem(IMPORTED_REVIEWS_STORAGE_KEY);
+    const arr=raw?JSON.parse(raw):[];
+    return Array.isArray(arr)?arr:[];
+  }catch(e){ return []; }
+}
+
+function saveImportedReviewFiles(items){
+  try{ localStorage.setItem(IMPORTED_REVIEWS_STORAGE_KEY,JSON.stringify(items||[])); }catch(e){}
+}
+
+function captureStorageChange(key, beforeRaw){
+  return {key:key,before:beforeRaw,after:localStorage.getItem(key)};
+}
+
+function renderImportedReviewFiles(){
+  const holder=document.getElementById('imported-review-files');
+  if(!holder) return;
+  const items=loadImportedReviewFiles();
+  if(!items.length){ holder.innerHTML=''; return; }
+  holder.innerHTML=items.map(function(item){
+    const detail=(item.imported||0)+' registros'+(item.reviewerHint?' · '+escapeHtml(item.reviewerHint):'');
+    return '<div class="imported-review-file" data-import-id="'+escapeHtml(item.importId)+'">'+
+      '<div class="meta"><div class="name">'+escapeHtml(item.fileName)+'</div><div class="detail">'+detail+'</div></div>'+
+      '<button class="remove" type="button" data-remove-import="'+escapeHtml(item.importId)+'">Quitar</button></div>';
+  }).join('');
+  holder.querySelectorAll('[data-remove-import]').forEach(function(btn){
+    btn.addEventListener('click',function(){ removeImportedReviewFile(btn.getAttribute('data-remove-import')); });
+  });
+}
+
+function removeImportedReviewFile(importId){
+  const items=loadImportedReviewFiles();
+  const idx=items.findIndex(function(x){ return x.importId===importId; });
+  if(idx<0) return;
+  const item=items[idx];
+  let restored=0,skipped=0;
+  (item.operations||[]).slice().reverse().forEach(function(op){
+    try{
+      const current=localStorage.getItem(op.key);
+      if(current!==op.after){ skipped++; return; }
+      if(op.before===null || op.before===undefined) localStorage.removeItem(op.key);
+      else localStorage.setItem(op.key,op.before);
+      restored++;
+    }catch(e){ skipped++; }
+  });
+  items.splice(idx,1);
+  saveImportedReviewFiles(items);
+  renderImportedReviewFiles();
+  rebuildReport();
+  let msg='Se quitó '+item.fileName+' · '+restored+' registros restaurados/eliminados';
+  if(skipped) msg+=' · '+skipped+' no se tocaron porque fueron modificados después de la importación';
+  reviewImportStatus(msg,'success');
+}
+
+function rememberImportedReviewFile(fileName, imported, operations, reviewerHint){
+  const items=loadImportedReviewFiles();
+  items.push({
+    importId:'imp_'+Date.now()+'_'+Math.random().toString(36).slice(2,8),
+    fileName:fileName,
+    imported:imported||0,
+    reviewerHint:reviewerHint||'',
+    importedAt:new Date().toISOString(),
+    operations:operations||[]
+  });
+  saveImportedReviewFiles(items);
+  renderImportedReviewFiles();
+}
+
+function importFindingReviewPayload(parsed, fallbackReviewer, operations){
   const items = Array.isArray(parsed && parsed.comentarios_hallazgos) ? parsed.comentarios_hallazgos : null;
   if(!items) return null;
   let imported=0, changed=0, unmatched=0;
@@ -2089,16 +2172,19 @@ function importFindingReviewPayload(parsed, fallbackReviewer){
     const proposalChanged=!sameReviewField(item.action,current.action)||!sameReviewField(item.current_text,current.current_text)||!sameReviewField(item.replacement_text,current.replacement_text);
     const wasResolved=!!item.resolved;
     const requiresRereview=wasResolved && proposalChanged;
+    const storageKey=noteStorageKey(item.bloque,item.id,reviewer);
+    const beforeRaw=localStorage.getItem(storageKey);
     saveFindingNote(item.bloque,item.id,reviewer,{
       note:item.note||'', resolved:requiresRereview?false:wasResolved, updatedAt:item.updated_at||null,
       requiresRereview:requiresRereview, previousResolved:requiresRereview, importedAt:new Date().toISOString(), reviewer:reviewer
     });
+    if(operations) operations.push(captureStorageChange(storageKey,beforeRaw));
     imported++; if(requiresRereview) changed++;
   });
   return {type:'findings',imported:imported,changed:changed,unmatched:unmatched};
 }
 
-function importDQReviewPayload(parsed, fallbackReviewer){
+function importDQReviewPayload(parsed, fallbackReviewer, operations){
   const items=Array.isArray(parsed && parsed.decision_questions)?parsed.decision_questions:null;
   if(!items) return null;
   let imported=0,unmatched=0;
@@ -2108,8 +2194,13 @@ function importDQReviewPayload(parsed, fallbackReviewer){
     if(!current){ unmatched++; return; }
     const reviewer=normalizeReviewerName(item.reviewer || fallbackReviewer);
     if(!reviewer){ unmatched++; return; }
+    const answerKey=answerStorageKey(item.bloque,item.dq_id,reviewer);
+    const commentKey=dqCommentStorageKey(item.bloque,item.dq_id,reviewer);
+    const answerBefore=localStorage.getItem(answerKey);
+    const commentBefore=localStorage.getItem(commentKey);
     saveAnswer(item.bloque,item.dq_id,reviewer,{answer:item.answer||'',resolved:!!item.resolved,updatedAt:item.updated_at||null,reviewer:reviewer});
     saveDQComment(item.bloque,item.dq_id,reviewer,{comment:item.review_comment||'',updatedAt:item.review_comment_updated_at||null,reviewer:reviewer});
+    if(operations){ operations.push(captureStorageChange(answerKey,answerBefore)); operations.push(captureStorageChange(commentKey,commentBefore)); }
     imported++;
   });
   return {type:'dqs',imported:imported,changed:0,unmatched:unmatched};
@@ -2166,16 +2257,19 @@ async function handlePreviousReviewFiles(fileList){
       fallbackReviewer=await askLegacyReviewer(file.name);
       if(!fallbackReviewer){ errors.push(file.name+': importación cancelada porque no se indicó quién realizó la revisión.'); continue; }
     }
-    const findingResult=importFindingReviewPayload(parsed,fallbackReviewer);
-    const dqResult=importDQReviewPayload(parsed,fallbackReviewer);
-    [findingResult,dqResult].filter(Boolean).forEach(function(result){ totalImported+=result.imported; totalChanged+=result.changed; totalUnmatched+=result.unmatched; });
+    const operations=[];
+    const findingResult=importFindingReviewPayload(parsed,fallbackReviewer,operations);
+    const dqResult=importDQReviewPayload(parsed,fallbackReviewer,operations);
+    let fileImported=0;
+    [findingResult,dqResult].filter(Boolean).forEach(function(result){ totalImported+=result.imported; fileImported+=result.imported; totalChanged+=result.changed; totalUnmatched+=result.unmatched; });
+    rememberImportedReviewFile(file.name,fileImported,operations,fallbackReviewer);
     recognized.push(file.name);
   }
   rebuildReport();
   let msg=totalImported+' registros restaurados';
   if(totalChanged) msg+=' · '+totalChanged+' revisados anteriormente requieren nueva revisión porque la propuesta cambió';
   if(totalUnmatched) msg+=' · '+totalUnmatched+' sin coincidencia en el JSON actual';
-  if(recognized.length) msg+=' · Archivos: '+recognized.join(', ');
+  if(recognized.length) msg+=' · '+recognized.length+' archivo'+(recognized.length===1?'':'s')+' agregado'+(recognized.length===1?'':'s');
   if(errors.length) msg+=' · '+errors.join(' ');
   reviewImportStatus(msg,errors.length?'error':'success');
 }
@@ -2920,6 +3014,8 @@ fileInput.addEventListener('change', function(e){
 dropzone.addEventListener('drop', function(e){
   if(e.dataTransfer.files && e.dataTransfer.files.length) handleFiles(e.dataTransfer.files);
 });
+
+renderImportedReviewFiles();
 
 const reviewImportBtn = document.getElementById('import-review-btn');
 const reviewImportInput = document.getElementById('review-import-input');
