@@ -510,10 +510,53 @@ details.detail-toggle summary::before{ color:var(--accent); }
 
 .hidden-by-filter{ display:none !important; }
 
+
+/* ---------- LEGAL QUESTIONS ---------- */
+.legal-toolbar{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:16px; }
+.legal-toolbar-left{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.legal-count{ font-size:.82rem; color:var(--ink-faint); }
+.legal-actions{ display:flex; gap:8px; flex-wrap:wrap; }
+.legal-actions button,.legal-form-actions button,.legal-mc-btn{
+  border:1px solid var(--line); background:var(--paper); color:var(--ink-soft); border-radius:7px;
+  padding:7px 11px; font:inherit; font-size:.8rem; cursor:pointer;
+}
+.legal-actions button:hover,.legal-form-actions button:hover,.legal-mc-btn:hover{ border-color:#B9C3D0; color:var(--accent); }
+.legal-actions .primary,.legal-form-actions .primary{ background:var(--accent); color:#fff; border-color:var(--accent); }
+.legal-list{ display:flex; flex-direction:column; gap:12px; }
+.legal-card{ border:1px solid var(--line); border-radius:10px; padding:16px; background:#fff; }
+.legal-head{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
+.legal-id{ font-weight:800; font-size:.86rem; color:var(--accent); }
+.legal-status{ font-size:.72rem; font-weight:700; padding:3px 8px; border-radius:999px; border:1px solid; }
+.legal-status.pending{ color:var(--orange-fg); background:var(--orange-bg); border-color:var(--orange-bd); }
+.legal-status.answered{ color:var(--green-fg); background:var(--green-bg); border-color:var(--green-bd); }
+.legal-lang-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.legal-lang{ background:#F8FAFC; border:1px solid var(--line); border-radius:8px; padding:12px; min-width:0; }
+.legal-lang-title{ font-size:.72rem; font-weight:800; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-faint); margin-bottom:7px; }
+.legal-question{ font-weight:700; margin-bottom:7px; }
+.legal-context{ color:var(--ink-soft); font-size:.88rem; }
+.legal-meta{ margin-top:10px; font-size:.8rem; color:var(--ink-faint); }
+.legal-answer{ margin-top:10px; border-left:3px solid var(--green-bd); padding:9px 11px; background:var(--green-bg); border-radius:0 7px 7px 0; }
+.legal-answer .lbl{ font-size:.72rem; font-weight:800; color:var(--green-fg); margin-bottom:4px; text-transform:uppercase; }
+.legal-card-actions{ display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
+.legal-form{ display:none; border:1px solid var(--blue-bd); background:#F7FAFD; border-radius:10px; padding:16px; margin-bottom:16px; }
+.legal-form.visible{ display:block; }
+.legal-form-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.legal-form-field{ display:flex; flex-direction:column; gap:5px; min-width:0; }
+.legal-form-field.full{ grid-column:1 / -1; }
+.legal-form-field label{ font-size:.76rem; font-weight:700; color:var(--ink-soft); }
+.legal-form-field input,.legal-form-field textarea,.legal-form-field select{
+  width:100%; border:1px solid #CBD3DF; border-radius:7px; padding:9px 10px; font:inherit; color:var(--ink); background:#fff;
+}
+.legal-form-field textarea{ min-height:90px; resize:vertical; }
+.legal-form-actions{ display:flex; justify-content:flex-end; gap:8px; margin-top:12px; flex-wrap:wrap; }
+.legal-empty{ color:var(--ink-faint); font-size:.86rem; padding:6px 0; }
+.legal-mc-action-row{ display:flex; justify-content:flex-end; margin-top:10px; }
+@media (max-width:720px){ .legal-lang-grid,.legal-form-grid{ grid-template-columns:1fr; } .legal-form-field.full{ grid-column:auto; } }
+
 /* print */
 @media print{
   body{ background:#fff; }
-  #upload-section, #schema-section, #report-nav, .filters-panel, #print-btn, .dq-toolbar{ display:none !important; }
+  #upload-section, #schema-section, #report-nav, .filters-panel, #print-btn, .dq-toolbar, .legal-toolbar, .legal-form, .legal-card-actions, .legal-mc-action-row{ display:none !important; }
   .panel{ box-shadow:none; border:1px solid #ccc; break-inside:avoid; }
   details.collapsible{ break-inside:avoid; }
   .change{ break-inside:avoid; }
@@ -610,6 +653,7 @@ details.detail-toggle summary::before{ color:var(--accent); }
     <a class="nav-link" href="#panel-summary">Totales</a>
     <a class="nav-link" href="#panel-change-summary" id="nav-change-summary">Resumen de cambios</a>
     <a class="nav-link" href="#panel-dq">Preguntas de decisión</a>
+    <a class="nav-link" href="#panel-legal">Consultas para Legal</a>
     <div class="nav-groups" id="nav-groups">
       <a class="nav-link" href="#" id="nav-groups-toggle">Grupos ▾</a>
       <div class="nav-groups-menu" id="nav-groups-menu"></div>
@@ -659,6 +703,74 @@ details.detail-toggle summary::before{ color:var(--accent); }
           </div>
           <div id="dq-list"></div>
           <div id="dq-empty" style="color:var(--ink-faint);font-size:0.86rem;display:none;">No hay preguntas de decisión registradas en los archivos cargados.</div>
+        </div>
+      </details>
+    </section>
+
+    <section class="panel" id="panel-legal">
+      <details class="dq-panel-details" open>
+        <summary class="panel-title dq-panel-summary">
+          Consultas para Legal
+          <span class="dq-panel-count" id="legal-panel-count"></span>
+          <span class="info-tooltip" title="Estas consultas forman parte del JSON de revisión, pero no son cambios a aplicar sobre el Documento Maestro.">ⓘ</span>
+        </summary>
+        <div class="dq-panel-body">
+          <div class="legal-toolbar">
+            <div class="legal-toolbar-left"><span class="legal-count" id="legal-summary-text"></span></div>
+            <div class="legal-actions">
+              <button type="button" class="primary" id="new-legal-btn">Nueva consulta legal</button>
+              <button type="button" id="export-complete-review-btn">Exportar revisión completa</button>
+              <button type="button" id="export-legal-md-btn">Exportar consultas para Legal</button>
+            </div>
+          </div>
+
+          <div class="legal-form" id="legal-form">
+            <div class="legal-form-grid">
+              <div class="legal-form-field" id="legal-source-wrap">
+                <label for="legal-source">Bloque</label>
+                <select id="legal-source"></select>
+              </div>
+              <div class="legal-form-field">
+                <label for="legal-id">ID</label>
+                <input id="legal-id" type="text" readonly>
+              </div>
+              <div class="legal-form-field full">
+                <label for="legal-question-es">Pregunta en español</label>
+                <textarea id="legal-question-es"></textarea>
+              </div>
+              <div class="legal-form-field full">
+                <label for="legal-context-es">Contexto en español</label>
+                <textarea id="legal-context-es"></textarea>
+              </div>
+              <div class="legal-form-field full">
+                <label for="legal-question-en">Question in English</label>
+                <textarea id="legal-question-en"></textarea>
+              </div>
+              <div class="legal-form-field full">
+                <label for="legal-context-en">Context in English</label>
+                <textarea id="legal-context-en"></textarea>
+              </div>
+              <div class="legal-form-field">
+                <label for="legal-related-mc">MC relacionados</label>
+                <input id="legal-related-mc" type="text" placeholder="MC-001, MC-002">
+              </div>
+              <div class="legal-form-field">
+                <label for="legal-status">Estado</label>
+                <select id="legal-status"><option value="pending">pending</option><option value="answered">answered</option></select>
+              </div>
+              <div class="legal-form-field full">
+                <label for="legal-answer">Respuesta (si existe)</label>
+                <textarea id="legal-answer" placeholder="Dejar vacío si todavía está pendiente"></textarea>
+              </div>
+            </div>
+            <div class="legal-form-actions">
+              <button type="button" id="legal-cancel-btn">Cancelar</button>
+              <button type="button" class="primary" id="legal-save-btn">Guardar consulta</button>
+            </div>
+          </div>
+
+          <div class="legal-list" id="legal-list"></div>
+          <div class="legal-empty" id="legal-empty">No hay consultas para Legal en los archivos cargados.</div>
         </div>
       </details>
     </section>
@@ -868,7 +980,11 @@ async function handleFiles(fileList){
       sourceId: 's' + sourceCounter,
       fileName: file.name,
       metadata: normalized.metadata,
-      changes: normalized.changes
+      changes: normalized.changes,
+      legal_questions: normalized.legal_questions || [],
+      legal_questions_summary: normalized.legal_questions_summary || {},
+      raw_metadata: JSON.parse(JSON.stringify(parsed.metadata || {})),
+      raw_changes: JSON.parse(JSON.stringify(parsed.changes || []))
     });
   }
   if(replacedLabels.length){
@@ -972,6 +1088,18 @@ function normalizeReviewData(raw){
       final_master_match: nz(c.final_master_match)
     };
   });
+  const legalQuestions = Array.isArray(raw.legal_questions) ? raw.legal_questions.map(function(q){
+    return {
+      id: nz(q.id),
+      question_es: nz(q.question_es),
+      question_en: nz(q.question_en),
+      context_es: nz(q.context_es),
+      context_en: nz(q.context_en),
+      related_mc: Array.isArray(q.related_mc) ? q.related_mc.slice() : [],
+      status: nz(q.status) || 'pending',
+      answer: nz(q.answer !== undefined ? q.answer : q.respuesta)
+    };
+  }) : [];
   return {
     metadata: {
       bloque: nz(meta.bloque),
@@ -996,7 +1124,9 @@ function normalizeReviewData(raw){
       consolidation_note: nz(meta.consolidation_note),
       change_summary: nz(meta.change_summary)
     },
-    changes: changes
+    changes: changes,
+    legal_questions: legalQuestions,
+    legal_questions_summary: raw.legal_questions_summary || {}
   };
 }
 
@@ -2283,6 +2413,235 @@ async function handlePreviousReviewFiles(fileList){
   reviewImportStatus(msg,errors.length?'error':'success');
 }
 
+
+/* =========================================================
+   LEGAL QUESTIONS
+   legal_questions[] is review-only material. It is never
+   applied to, or interpreted as, a Documento Maestro change.
+   ========================================================= */
+let LEGAL_EDIT_STATE = null; // {sourceId, id, isNew}
+
+function legalSourceById(sourceId){
+  return SOURCES.find(function(s){ return s.sourceId === sourceId; }) || null;
+}
+
+function recalcLegalSummary(src){
+  if(!src) return {total:0,pending:0,answered:0};
+  const list = Array.isArray(src.legal_questions) ? src.legal_questions : [];
+  const summary = {
+    total: list.length,
+    pending: list.filter(function(q){ return q.status !== 'answered'; }).length,
+    answered: list.filter(function(q){ return q.status === 'answered'; }).length
+  };
+  src.legal_questions_summary = summary;
+  return summary;
+}
+
+function nextLegalId(src){
+  let max = 0;
+  (src.legal_questions || []).forEach(function(q){
+    const m = String(q.id || '').match(/^L-(\d+)$/i);
+    if(m) max = Math.max(max, parseInt(m[1],10) || 0);
+  });
+  return 'L-' + String(max + 1).padStart(3,'0');
+}
+
+function parseRelatedMC(raw){
+  const seen = new Set();
+  return String(raw || '').split(/[,\n;]/).map(function(v){ return v.trim(); }).filter(function(v){
+    if(!v || seen.has(v)) return false;
+    seen.add(v); return true;
+  });
+}
+
+function legalQuestionToExport(q){
+  return {
+    id: q.id || null,
+    question_es: q.question_es || '',
+    context_es: q.context_es || '',
+    question_en: q.question_en || '',
+    context_en: q.context_en || '',
+    related_mc: Array.isArray(q.related_mc) ? q.related_mc.slice() : [],
+    status: q.status === 'answered' ? 'answered' : 'pending',
+    answer: q.answer || ''
+  };
+}
+
+function renderLegalQuestions(){
+  const listEl = document.getElementById('legal-list');
+  const emptyEl = document.getElementById('legal-empty');
+  const countEl = document.getElementById('legal-panel-count');
+  const summaryEl = document.getElementById('legal-summary-text');
+  if(!listEl) return;
+  listEl.innerHTML = '';
+  const entries = [];
+  let pending=0, answered=0;
+  SOURCES.forEach(function(src){
+    recalcLegalSummary(src);
+    (src.legal_questions || []).forEach(function(q){
+      entries.push({src:src,q:q});
+      if(q.status === 'answered') answered++; else pending++;
+    });
+  });
+  if(countEl) countEl.textContent = entries.length ? '(' + pending + ' pendientes)' : '';
+  if(summaryEl) summaryEl.textContent = entries.length + ' consulta(s) · ' + pending + ' pendiente(s) · ' + answered + ' respondida(s)';
+  emptyEl.style.display = entries.length ? 'none' : 'block';
+  const multi = SOURCES.length > 1;
+  entries.forEach(function(entry){
+    const src=entry.src, q=entry.q;
+    const card=document.createElement('div');
+    card.className='legal-card';
+    let html='<div class="legal-head"><span class="legal-id">'+escapeHtml(q.id || 'Sin ID')+'</span>' +
+      '<span class="legal-status '+(q.status==='answered'?'answered':'pending')+'">'+escapeHtml(q.status==='answered'?'answered':'pending')+'</span>';
+    if(multi) html += '<span class="source-tag '+sourceColorClass(src.sourceId)+'">'+escapeHtml(src.metadata.bloque || src.fileName)+'</span>';
+    html += '</div>';
+    html += '<div class="legal-lang-grid">';
+    html += '<div class="legal-lang"><div class="legal-lang-title">Español</div><div class="legal-question">'+(q.question_es ? renderMarkdown(q.question_es) : '<span class="location-missing">Pregunta no informada</span>')+'</div><div class="legal-context">'+(q.context_es ? renderMarkdown(q.context_es) : '<span class="location-missing">Contexto no informado</span>')+'</div></div>';
+    html += '<div class="legal-lang"><div class="legal-lang-title">English</div><div class="legal-question">'+(q.question_en ? renderMarkdown(q.question_en) : '<span class="location-missing">Question not provided</span>')+'</div><div class="legal-context">'+(q.context_en ? renderMarkdown(q.context_en) : '<span class="location-missing">Context not provided</span>')+'</div></div>';
+    html += '</div>';
+    html += '<div class="legal-meta"><strong>MC relacionados:</strong> '+(q.related_mc && q.related_mc.length ? q.related_mc.map(escapeHtml).join(', ') : 'Ninguno')+'</div>';
+    if(q.answer){ html += '<div class="legal-answer"><div class="lbl">Respuesta</div>'+renderMarkdown(q.answer)+'</div>'; }
+    html += '<div class="legal-card-actions"><button type="button" class="legal-edit-btn" data-source-id="'+escapeHtml(src.sourceId)+'" data-legal-id="'+escapeHtml(q.id)+'">Editar consulta</button></div>';
+    card.innerHTML=html;
+    listEl.appendChild(card);
+  });
+  attachLegalEditButtons();
+}
+
+function fillLegalSourceSelect(selectedId){
+  const sel=document.getElementById('legal-source');
+  const wrap=document.getElementById('legal-source-wrap');
+  sel.innerHTML='';
+  SOURCES.forEach(function(src){
+    const opt=document.createElement('option'); opt.value=src.sourceId; opt.textContent=src.metadata.bloque || src.fileName; sel.appendChild(opt);
+  });
+  if(selectedId) sel.value=selectedId;
+  wrap.style.display = SOURCES.length > 1 ? '' : 'none';
+}
+
+function openLegalForm(opts){
+  opts=opts||{};
+  if(!SOURCES.length){ showError(['Primero cargá un JSON principal de revisión.']); return; }
+  const sourceId=opts.sourceId || (SOURCES[0] && SOURCES[0].sourceId);
+  const src=legalSourceById(sourceId) || SOURCES[0];
+  fillLegalSourceSelect(src.sourceId);
+  const existing = opts.id ? (src.legal_questions || []).find(function(q){ return q.id===opts.id; }) : null;
+  const id = existing ? existing.id : nextLegalId(src);
+  LEGAL_EDIT_STATE={sourceId:src.sourceId,id:id,isNew:!existing};
+  document.getElementById('legal-id').value=id;
+  document.getElementById('legal-question-es').value=existing ? (existing.question_es||'') : '';
+  document.getElementById('legal-context-es').value=existing ? (existing.context_es||'') : '';
+  document.getElementById('legal-question-en').value=existing ? (existing.question_en||'') : '';
+  document.getElementById('legal-context-en').value=existing ? (existing.context_en||'') : '';
+  document.getElementById('legal-related-mc').value=existing ? ((existing.related_mc||[]).join(', ')) : (opts.mcId || '');
+  document.getElementById('legal-status').value=existing && existing.status==='answered' ? 'answered' : 'pending';
+  document.getElementById('legal-answer').value=existing ? (existing.answer||'') : '';
+  const form=document.getElementById('legal-form'); form.classList.add('visible');
+  form.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function closeLegalForm(){
+  LEGAL_EDIT_STATE=null;
+  const form=document.getElementById('legal-form'); if(form) form.classList.remove('visible');
+}
+
+function syncLegalIdForSelectedSource(){
+  if(!LEGAL_EDIT_STATE || !LEGAL_EDIT_STATE.isNew) return;
+  const sid=document.getElementById('legal-source').value;
+  const src=legalSourceById(sid); if(!src) return;
+  LEGAL_EDIT_STATE.sourceId=sid;
+  LEGAL_EDIT_STATE.id=nextLegalId(src);
+  document.getElementById('legal-id').value=LEGAL_EDIT_STATE.id;
+}
+
+function saveLegalQuestion(){
+  if(!LEGAL_EDIT_STATE) return;
+  const sourceId=document.getElementById('legal-source').value || LEGAL_EDIT_STATE.sourceId;
+  const src=legalSourceById(sourceId); if(!src) return;
+  const questionEs=document.getElementById('legal-question-es').value.trim();
+  const questionEn=document.getElementById('legal-question-en').value.trim();
+  if(!questionEs && !questionEn){ alert('Completá al menos la pregunta en español o en inglés.'); return; }
+  let id=LEGAL_EDIT_STATE.id;
+  if(LEGAL_EDIT_STATE.isNew && sourceId !== LEGAL_EDIT_STATE.sourceId) id=nextLegalId(src);
+  const q={
+    id:id,
+    question_es:questionEs,
+    context_es:document.getElementById('legal-context-es').value.trim(),
+    question_en:questionEn,
+    context_en:document.getElementById('legal-context-en').value.trim(),
+    related_mc:parseRelatedMC(document.getElementById('legal-related-mc').value),
+    status:document.getElementById('legal-status').value==='answered'?'answered':'pending',
+    answer:document.getElementById('legal-answer').value.trim()
+  };
+  if(q.answer && q.status!=='answered') q.status='answered';
+  if(!Array.isArray(src.legal_questions)) src.legal_questions=[];
+  const idx=src.legal_questions.findIndex(function(item){ return item.id===id; });
+  if(LEGAL_EDIT_STATE.isNew || idx<0) src.legal_questions.push(q); else src.legal_questions[idx]=q;
+  recalcLegalSummary(src);
+  closeLegalForm();
+  renderLegalQuestions();
+}
+
+function attachLegalEditButtons(){
+  document.querySelectorAll('.legal-edit-btn').forEach(function(btn){
+    btn.addEventListener('click',function(){ openLegalForm({sourceId:btn.dataset.sourceId,id:btn.dataset.legalId}); });
+  });
+}
+
+function attachLegalQuestionButtons(){
+  document.querySelectorAll('.new-legal-from-mc').forEach(function(btn){
+    btn.addEventListener('click',function(){ openLegalForm({sourceId:btn.dataset.sourceId,mcId:btn.dataset.mcId}); });
+  });
+}
+
+function safeExportName(text){
+  return String(text||'revision').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9_-]+/g,'-').replace(/^-+|-+$/g,'').toLowerCase() || 'revision';
+}
+
+function completeReviewPayload(src){
+  const summary=recalcLegalSummary(src);
+  return {
+    metadata: JSON.parse(JSON.stringify(src.raw_metadata || src.metadata || {})),
+    changes: JSON.parse(JSON.stringify(src.raw_changes || src.changes || [])),
+    legal_questions: (src.legal_questions || []).map(legalQuestionToExport),
+    legal_questions_summary: summary
+  };
+}
+
+function exportCompleteReview(){
+  if(!SOURCES.length){ alert('Primero cargá un JSON principal de revisión.'); return; }
+  SOURCES.forEach(function(src,index){
+    const payload=completeReviewPayload(src);
+    const base=safeExportName(src.metadata.bloque || src.fileName || ('revision-'+(index+1)));
+    downloadFile(base+'-revision-completa.json',JSON.stringify(payload,null,2),'application/json');
+  });
+}
+
+function exportLegalMarkdown(){
+  const entries=[];
+  SOURCES.forEach(function(src){ (src.legal_questions||[]).forEach(function(q){ entries.push({src:src,q:q}); }); });
+  let md='# Consultas para Legal\n\n_Exportado: '+new Date().toISOString()+'_\n\n';
+  function group(title,status){
+    md+='## '+title+'\n\n';
+    const items=entries.filter(function(e){ return (e.q.status==='answered'?'answered':'pending')===status; });
+    if(!items.length){ md+='_No hay consultas en este grupo._\n\n'; return; }
+    items.forEach(function(e){
+      const q=e.q;
+      md+='### '+(q.id||'Sin ID')+' — '+(e.src.metadata.bloque||e.src.fileName)+'\n\n';
+      md+='**Español — pregunta**\n\n'+(q.question_es||'_Sin pregunta_')+'\n\n';
+      md+='**Español — contexto**\n\n'+(q.context_es||'_Sin contexto_')+'\n\n';
+      md+='**English — question**\n\n'+(q.question_en||'_No question_')+'\n\n';
+      md+='**English — context**\n\n'+(q.context_en||'_No context_')+'\n\n';
+      md+='**MC relacionados:** '+((q.related_mc||[]).length?q.related_mc.join(', '):'Ninguno')+'\n\n';
+      if(q.answer) md+='**Respuesta:**\n\n'+q.answer+'\n\n';
+      md+='---\n\n';
+    });
+  }
+  group('Pendientes','pending');
+  group('Respondidas','answered');
+  downloadFile('consultas-para-legal.md',md,'text/markdown');
+}
+
 /* =========================================================
    REPORT RENDERERS
    ========================================================= */
@@ -2304,6 +2663,7 @@ function rebuildReport(){
   renderSummary(SOURCES, combined.changes);
   renderChangeSummary(SOURCES);
   renderDecisionQuestions(combined.dqEntries);
+  renderLegalQuestions();
   renderFilters(combined.changes);
   renderReviewGroups(combined.changes);
   renderNavGroups(combined.changes);
@@ -2314,6 +2674,7 @@ function rebuildReport(){
   if(commentableChanges.length){
     groupsToolbar.classList.add('visible');
     attachFindingNoteHandlers(commentableChanges);
+    attachLegalQuestionButtons();
     updateFindingNotesCount(commentableChanges);
   }else{
     groupsToolbar.classList.remove('visible');
@@ -2821,6 +3182,8 @@ function renderChange(c, showSourceTag){
     '</div>' +
   '</div>';
 
+  html += '<div class="legal-mc-action-row"><button type="button" class="legal-mc-btn new-legal-from-mc" data-source-id="' + escapeHtml(c._sourceId) + '" data-mc-id="' + escapeHtml(c.id) + '">Nueva consulta legal desde este MC</button></div>';
+
   if(c.decision_question_id){
     html += renderRelatedPending(c);
   }
@@ -3042,6 +3405,13 @@ document.getElementById('dq-hide-resolved-toggle').addEventListener('change', fu
 });
 document.getElementById('export-notes-md-btn').addEventListener('click', exportFindingNotesMarkdown);
 document.getElementById('export-notes-json-btn').addEventListener('click', exportFindingNotesJSON);
+
+document.getElementById('new-legal-btn').addEventListener('click', function(){ openLegalForm({}); });
+document.getElementById('legal-cancel-btn').addEventListener('click', closeLegalForm);
+document.getElementById('legal-save-btn').addEventListener('click', saveLegalQuestion);
+document.getElementById('legal-source').addEventListener('change', syncLegalIdForSelectedSource);
+document.getElementById('export-complete-review-btn').addEventListener('click', exportCompleteReview);
+document.getElementById('export-legal-md-btn').addEventListener('click', exportLegalMarkdown);
 </script>
 </body>
 </html>
