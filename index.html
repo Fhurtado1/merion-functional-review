@@ -115,20 +115,20 @@ input[type=file]{ display:none; }
 #report-nav a.nav-link:hover{ text-decoration:none; filter:brightness(0.98); }
 
 /* Colores suaves por sección en la navegación */
-#report-nav a.nav-link[href="#panel-summary"]{
-  background:#EAF0F6; color:#2C4A6E; border:1px solid #C4D5E7;
+#report-nav a.nav-link.nav-total{
+  background:#E4EEF9 !important; color:#244F79 !important; border:1px solid #B8D0E8 !important;
 }
-#report-nav a.nav-link[href="#panel-change-summary"]{
-  background:#E3F4F2; color:#1D6D64; border:1px solid #B9E1DB;
+#report-nav a.nav-link.nav-changes{
+  background:#DFF3EE !important; color:#17685E !important; border:1px solid #A9DCD1 !important;
 }
-#report-nav a.nav-link[href="#panel-dq"]{
-  background:#FCF0E2; color:#8A4A0C; border:1px solid #F3D6AC;
+#report-nav a.nav-link.nav-decisions{
+  background:#FDE9D2 !important; color:#8B4B0B !important; border:1px solid #EDC28F !important;
 }
-#report-nav a.nav-link[href="#panel-legal"]{
-  background:#FBEBEA; color:#9B3127; border:1px solid #F1C6C1;
+#report-nav a.nav-link.nav-legal{
+  background:#F9DEDC !important; color:#9B3026 !important; border:1px solid #E8AAA4 !important;
 }
-#report-nav #nav-groups-toggle{
-  background:#EFE9F7; color:#5B3E96; border:1px solid #D5C7EC;
+#report-nav a.nav-link.nav-groups-color{
+  background:#EAE2F5 !important; color:#573590 !important; border:1px solid #CDBDE5 !important;
 }
 #report-nav a.nav-link:hover{ box-shadow:0 1px 4px rgba(20,30,50,.08); }
 
@@ -177,10 +177,10 @@ input[type=file]{ display:none; }
 
 
 /* Color suave por sección */
-#panel-summary{ border-color:#D7E3EF; background:#FBFCFE; }
-#panel-change-summary{ border-color:#CFE8E4; background:#FBFEFD; }
-#panel-dq{ border-color:#F2D2B6; background:#FFFCF8; }
-#panel-legal{ border-color:#F1C6C1; background:#FFF9F8; }
+#panel-summary{ border-color:#B8D0E8 !important; background:#F3F8FD !important; }
+#panel-change-summary{ border-color:#A9DCD1 !important; background:#F1FAF7 !important; }
+#panel-dq{ border-color:#EDC28F !important; background:#FFF7EE !important; }
+#panel-legal{ border-color:#E8AAA4 !important; background:#FFF1F0 !important; }
 #panel-dq > .dq-panel-details > summary.dq-panel-summary,
 #panel-legal > .dq-panel-details > summary.dq-panel-summary{
   margin:-14px -16px 18px; padding:14px 16px; border-radius:9px; border-bottom:0;
@@ -690,12 +690,12 @@ details.detail-toggle summary::before{ color:var(--accent); }
   </section>
 
   <nav id="report-nav">
-    <a class="nav-link" href="#panel-summary">Totales</a>
-    <a class="nav-link" href="#panel-change-summary" id="nav-change-summary">Resumen de cambios</a>
-    <a class="nav-link" href="#panel-dq">Preguntas de decisión</a>
-    <a class="nav-link" href="#panel-legal">Consultas para Legal</a>
+    <a class="nav-link nav-total" href="#panel-summary">Totales</a>
+    <a class="nav-link nav-changes" href="#panel-change-summary" id="nav-change-summary">Resumen de cambios</a>
+    <a class="nav-link nav-decisions" href="#panel-dq">Preguntas funcionales / técnicas</a>
+    <a class="nav-link nav-legal" href="#panel-legal">Consultas para Legal</a>
     <div class="nav-groups" id="nav-groups">
-      <a class="nav-link" href="#" id="nav-groups-toggle">Grupos ▾</a>
+      <a class="nav-link nav-groups-color" href="#" id="nav-groups-toggle">Grupos ▾</a>
       <div class="nav-groups-menu" id="nav-groups-menu"></div>
     </div>
     <input type="text" id="nav-search" placeholder="Buscar por ID o término (ej. CLR-032, Legal Representative)">
