@@ -594,6 +594,55 @@ details.detail-toggle summary::before{ color:var(--accent); }
 @media (max-width:720px){ .legal-lang-grid,.legal-form-grid{ grid-template-columns:1fr; } .legal-form-field.full{ grid-column:auto; } }
 
 /* print */
+
+/* Guía visual de estructura JSON */
+.schema-overview{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px;
+  margin:4px 0 18px;
+}
+.schema-step{
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:14px;
+  background:#fff;
+  min-width:0;
+}
+.schema-step .schema-num{
+  width:28px;height:28px;border-radius:999px;
+  display:inline-flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:13px;margin-bottom:8px;
+  background:#E4EEF9;color:#244F79;
+}
+.schema-step:nth-child(2) .schema-num{background:#DFF3EE;color:#17685E;}
+.schema-step:nth-child(3) .schema-num{background:#FDE9D2;color:#8B4B0B;}
+.schema-step:nth-child(4) .schema-num{background:#F9DEDC;color:#9B3026;}
+.schema-step strong{display:block;margin-bottom:5px;}
+.schema-step p{margin:0;color:var(--muted);font-size:13px;line-height:1.45;}
+.schema-callout{
+  border-left:4px solid #7A9BC2;
+  background:#F5F8FC;
+  padding:12px 14px;
+  border-radius:8px;
+  margin:10px 0 18px;
+  font-size:13px;
+  line-height:1.5;
+}
+.schema-section-title{
+  margin:22px 0 8px;
+  padding:9px 11px;
+  border-radius:8px;
+  background:#F3F5F8;
+  font-weight:800;
+}
+@media(max-width:760px){
+  .schema-overview{grid-template-columns:1fr 1fr;}
+}
+@media(max-width:480px){
+  .schema-overview{grid-template-columns:1fr;}
+}
+
 @media print{
   body{ background:#fff; }
   #upload-section, #schema-section, #report-nav, .filters-panel, #print-btn, .dq-toolbar, .legal-toolbar, .legal-form, .legal-card-actions, .legal-mc-action-row{ display:none !important; }
@@ -682,8 +731,8 @@ details.detail-toggle summary::before{ color:var(--accent); }
   <section id="schema-section" class="panel">
     <details class="dq-panel-details" id="schema-details">
       <summary class="panel-title dq-panel-summary">
-        Estructura del JSON — guía para generar un archivo nuevo
-        <span class="info-tooltip" title="Referencia de los campos que este HTML puede interpretar, indicando cuáles son obligatorios y cuáles opcionales. Sirve para generar nuevos archivos de cambios con la estructura correcta o comprender la estructura de un archivo existente.">ⓘ</span>
+        Estructura actual del JSON — guía rápida
+        <span class="info-tooltip" title="Explica de forma simple cómo está organizado el JSON actual: metadata, cambios, preguntas funcionales/técnicas y consultas legales.">ⓘ</span>
       </summary>
       <div class="dq-panel-body" id="schema-body"></div>
     </details>
@@ -1513,185 +1562,181 @@ function renderBadge(text, colorClass){
    loaded — rendered once on page load.
    ========================================================= */
 const SCHEMA_DOC_MD =
-"Un archivo es un único objeto JSON con dos claves de primer nivel: `metadata` (datos generales del bloque) y `changes` (un array, un objeto por cada hallazgo o cambio propuesto).\n" +
+"**Qué tiene hoy el JSON**\n" +
 "\n" +
-"**1. Campos de `metadata` que el HTML usa activamente**\n" +
+"El archivo actual tiene **4 bloques principales**: `metadata`, `changes`, `legal_questions` y `legal_questions_summary`. Las preguntas funcionales/técnicas no son un quinto bloque: su detalle está dentro de `metadata.decision_questions_summary`.\n" +
 "\n" +
-"| Campo | Obligatorio | Qué es |\n" +
-"|---|---|---|\n" +
-"| `bloque` | Sí | Nombre del bloque. Se usa como identificador: al cargar un archivo con el mismo `bloque` que uno ya cargado, el HTML lo reemplaza automáticamente en vez de sumarlo. |\n" +
-"| `orden` | No | Orden sugerido de este bloque dentro de la secuencia de trabajo. |\n" +
-"| `functional_source` | No | De qué documento funcional sale este bloque. |\n" +
-"| `master_base` | No | Versión del Documento Maestro contra la que se hizo la revisión. |\n" +
-"| `total_changes` | No | Cantidad total de cambios informada por quien generó el archivo. El HTML calcula el total real por su cuenta; esto es solo referencia. |\n" +
-"| `resumen_acciones` | No | Mapa plano acción → cantidad, por ejemplo accion replace_exact con valor 164. Tiene que ser un objeto plano de acción a número, nunca anidado. |\n" +
-"| `decision_questions_summary` | No | Objeto con una entrada por cada pregunta de decisión. La clave es el ID de la pregunta, por ejemplo DQ-LEASE-TIPO. Ver la tabla dedicada más abajo. |\n" +
-"| `change_summary` | No | Resumen ejecutivo legible de lo que cambia en el bloque. Puede incluir `title`, `intro`, `sections` (cada sección con `title` y `bullets`) y `note`. Los bullets pueden ser texto simple o un objeto con `title` y `text`. El HTML lo muestra en una sección propia antes del detalle de hallazgos. |\n" +
+"**1. `metadata` — información general de la revisión**\n" +
 "\n" +
-"**2. Campos de `metadata` de trazabilidad, opcionales**\n" +
+"Estos son los campos que aparecen actualmente en el JSON de revisión:\n" +
 "\n" +
-"No son obligatorios. El HTML los conserva sin perderlos si están presentes, pero hoy solo muestra en pantalla `purpose` y `generated_at` en el encabezado; el resto queda disponible para quien abra el JSON directamente.\n" +
-"\n" +
-"| Campo | Qué es |\n" +
+"| Campo | Para qué sirve |\n" +
 "|---|---|\n" +
-"| `generated_at` | Fecha de generación del archivo. |\n" +
-"| `purpose` | Para qué se armó este archivo puntual, por ejemplo si es un consolidado final que no debe usarse para reaplicar cambios. |\n" +
-"| `source_manifest` | Lista de los archivos originales que se consolidaron, con cuántos cambios aportó cada uno. |\n" +
-"| `batches_originales_no_duplicados` | Nota sobre qué archivos ya están contenidos en este consolidado y no deben volver a sumarse aparte. |\n" +
-"| `decision_questions` | Resumen numérico de preguntas: pendientes, resueltas, total. Distinto de `decision_questions_summary`, que es el detalle pregunta por pregunta. |\n" +
-"| `estado_final_resumen` | Conteo de cuántos hallazgos quedaron en cada estado final descriptivo. |\n" +
-"| `final_master_checks` | Verificaciones numéricas de consistencia contra el Maestro final. |\n" +
-"| `final_master_checks_body` | Conteos de apariciones de ciertos términos en el cuerpo del Maestro final. |\n" +
-"| `final_master_note` | Nota explicando alguna decisión terminológica tomada en la consolidación final. |\n" +
-"| `consolidation_note` | Nota sobre qué se consolidó y por qué. |\n" +
+"| `bloque` | Nombre de la revisión o bloque cargado. |\n" +
+"| `orden` | Orden de trabajo sugerido. |\n" +
+"| `functional_source` | Fuente funcional utilizada para generar la revisión. |\n" +
+"| `master_base` | Versión del Documento Maestro revisada. |\n" +
+"| `generated_at` | Fecha de generación. |\n" +
+"| `total_changes` | Cantidad total de hallazgos/cambios. |\n" +
+"| `resumen_acciones` | Cantidad de `replace_exact`, `replace_block`, `skip`, `delete`, etc. |\n" +
+"| `decision_questions_summary` | Detalle de las preguntas funcionales/técnicas. |\n" +
+"| `decision_questions` | Totales de preguntas pendientes, resueltas y total. |\n" +
+"| `purpose` | Objetivo de esta revisión. |\n" +
+"| `consolidation_note` | Explica qué se consolidó o ajustó en esta versión. |\n" +
+"| `comparison_summary` | Comparación con revisiones anteriores, cuando existe. |\n" +
+"| `change_summary` | Resumen legible de los cambios principales. |\n" +
+"| `revision_scope` | Alcance de la revisión y chequeos realizados. |\n" +
+"| `master_alignment` | Resultado de la validación contra el Maestro base. |\n" +
+"| `viewer_display_rules` | Reglas para mostrar Actual / Propuesto en el visor. |\n" +
+"| `ordering` | Regla de orden de los MC. |\n" +
+"| `cross_reference_validation` | Validación de referencias internas del Maestro. |\n" +
+"| `sweep_2026_10_06` | Registro del barrido transversal realizado en esa revisión. |\n" +
 "\n" +
-"**3. Cada entrada de `decision_questions_summary`**\n" +
+"**2. `changes[]` — los hallazgos MC**\n" +
 "\n" +
-"| Campo | Obligatorio | Qué es |\n" +
-"|---|---|---|\n" +
-"| `question` | Sí, si la pregunta existe | El texto completo de la pregunta. |\n" +
-"| `status` | No | pending, resolved o closed. Si no está, el HTML la trata como pendiente. |\n" +
-"| `affected_ids` | No | Lista de ids de `changes` que dependen de esta pregunta. |\n" +
-"| `bloque` | No | Sub-bloque temático dentro del bloque general, por ejemplo Lease. |\n" +
-"| `answer` | No | La respuesta ya definida, si la pregunta fue resuelta en una revisión anterior. |\n" +
-"| `resolved_at` | No | Fecha en que se resolvió. |\n" +
-"| `source_stage` | No | En qué etapa o lote se originó o se resolvió esta pregunta. |\n" +
+"Cada objeto representa un hallazgo o cambio. Para entenderlo rápido, los campos se pueden leer en 5 grupos:\n" +
 "\n" +
-"**4. Campos de cada objeto dentro de `changes[]`, núcleo**\n" +
-"\n" +
-"| Campo | Obligatorio | Qué es |\n" +
-"|---|---|---|\n" +
-"| `id` | Sí | Identificador único del hallazgo dentro del bloque, por ejemplo B1-1.1. |\n" +
-"| `action` | Sí | Uno de: replace_exact, replace_block, manual_review, skip, delete. |\n" +
-"| `section` | No | Ubicación en el Documento Maestro. Es lo que el HTML muestra como ubicación principal de cada hallazgo. |\n" +
-"| `concept` | No | Concepto o término en juego. |\n" +
-"| `md_line` | No | Número de línea de referencia en el markdown del Maestro. Solo aparece como referencia técnica secundaria, nunca como ubicación principal. |\n" +
-"| `contexto_hallazgo` | No | Explica en qué contexto aparece el hallazgo y qué función cumple esa parte del Maestro antes de comparar textos. |\n" +
-"| `resumen_cambio` | No | Explica en lenguaje simple qué se propone cambiar y en qué sentido, sin repetir literalmente el replacement_text. El HTML lo muestra como “Qué se cambia”. |\n" +
-"| `current_text` | Depende de la acción | Texto actual en el Maestro, tal cual está hoy. |\n" +
-"| `replacement_text` | Depende de la acción | Texto propuesto para reemplazar. Vacío en skip y delete. |\n" +
-"| `reason` | No | Motivo del cambio. |\n" +
-"| `antecedente` | No | Puede ser texto libre en un párrafo narrativo, o un objeto con introduced_in_version, introduced_context, original_rationale y source. El HTML acepta las dos formas. |\n" +
-"| `que_se_conserva` | No | Qué parte del texto original se mantiene sin tocar. |\n" +
-"| `impacto_o_tema_relacionado` | No | Tema relacionado o impacto cruzado con otras secciones. |\n" +
-"| `estado` | No | Estado descriptivo libre, por ejemplo Aplicado o Pendiente de validación legal. |\n" +
-"| `bloque_diferido` | No | Si este hallazgo se difiere a otro bloque, el nombre de ese bloque. |\n" +
-"| `decision_source` | No | De dónde sale la decisión, por ejemplo review. |\n" +
-"| `change_type` | No | mechanical, conceptual, critical o pending son los cuatro valores del criterio de clasificación original. En archivos consolidados recientes también aparecieron technical, legal, documentation y editorial. |\n" +
-"| `review_priority` | No | high, medium o low. |\n" +
-"| `needs_human_review` | No | true o false. |\n" +
-"| `review_note` | No | Nota de quien revisó, explicando el criterio aplicado. |\n" +
-"| `review_group_id` / `review_group_title` | No | Agrupan hallazgos relacionados en la vista de Hallazgos. |\n" +
-"| `decision_question_id` | No | Si este hallazgo depende de una pregunta de decisión, el ID de esa pregunta. Tiene que existir como clave en decision_questions_summary para que se pueda enlazar. |\n" +
-"\n" +
-"**5. Campos de trazabilidad opcionales en `changes[]`**\n" +
-"\n" +
-"Igual que en metadata, no son obligatorios. El HTML preserva todos, pero por ahora solo `source_file` y `final_master_status` se muestran dentro del detalle secundario de cada hallazgo, en Ver motivo y detalle.\n" +
-"\n" +
-"| Campo | Qué es |\n" +
+"| Grupo | Campos principales |\n" +
 "|---|---|\n" +
-"| `source_file` | De qué archivo original vino este hallazgo antes de consolidarse. |\n" +
-"| `source_stage` | En qué etapa del proceso se originó. |\n" +
-"| `subblock_origen` | Sub-bloque de origen, por ejemplo Owner o Tenant. |\n" +
-"| `estado_origen` | Estado que tenía este hallazgo en una revisión anterior, antes del estado final. |\n" +
-"| `final_master_status` | Estado final de este hallazgo contra el Maestro final. |\n" +
-"| `final_master_match` | Objeto con conteos de ocurrencias del texto actual y propuesto encontradas en el Maestro final, para verificar si el cambio quedó aplicado. |\n" +
+"| Identificación | `id`, `concept`, `section`, `md_line`, `review_order` |\n" +
+"| Qué se encontró | `contexto_hallazgo`, `current_text`, `reason`, `antecedente` |\n" +
+"| Qué se propone | `action`, `replacement_text`, `resumen_cambio`, `que_se_conserva` |\n" +
+"| Clasificación | `estado`, `change_type`, `review_priority`, `needs_human_review`, `review_group_id`, `review_group_title` |\n" +
+"| Trazabilidad | `decision_source`, `review_note`, `source_change_id`, `decision_question_id`, `resolved_decision_question_id`, `proposal_status`, `integrated_in`, `display_instruction`, `bloque_diferido`, `impacto_o_tema_relacionado` |\n" +
 "\n" +
-"**6. Notas para generar un archivo nuevo**\n" +
+"**Valores habituales de `action`:** `replace_exact`, `replace_block`, `skip`, `delete` y `manual_review`.\n" +
 "\n" +
-"- No inventar valores para `action`, `change_type` ni `review_priority` fuera de los listados arriba.\n" +
-"- `resumen_acciones` tiene que ser un mapa plano de acción a número entero, nunca un objeto anidado, o el HTML lo va a mostrar mal.\n" +
-"- Cada `id` de `changes[]` tiene que ser único dentro del archivo.\n" +
-"- Si un hallazgo depende de una pregunta de decisión, el `decision_question_id` tiene que apuntar a una clave real dentro de `decision_questions_summary` en ese mismo archivo.\n" +
-"- Para revisiones funcionales nuevas conviene completar `contexto_hallazgo` y `resumen_cambio`: el primero ubica al lector y el segundo explica el cambio antes de mostrar Actual / Propuesto.\n" +
-"- Esta guía se armó a partir del criterio de clasificación acordado más el archivo consolidado más reciente. Si aparece un campo nuevo en un archivo futuro que no está listado acá, hay que sumarlo a esta referencia para que no se pierda.";
+"**3. Preguntas funcionales / técnicas**\n" +
+"\n" +
+"Se guardan dentro de `metadata.decision_questions_summary`. Cada pregunta puede contener:\n" +
+"\n" +
+"| Campo | Qué significa |\n" +
+"|---|---|\n" +
+"| `question` | Pregunta que hay que resolver. |\n" +
+"| `status` | Estado, por ejemplo `pending` o `resolved`. |\n" +
+"| `bloque` | Tema o bloque al que pertenece. |\n" +
+"| `affected_ids` | MC afectados por la decisión. |\n" +
+"| `answer` | Respuesta definida, si ya fue resuelta. |\n" +
+"| `resolved_at` | Fecha de resolución. |\n" +
+"| `legal_follow_up` | Referencia a una consulta legal derivada, si corresponde. |\n" +
+"\n" +
+"`metadata.decision_questions` guarda solamente el resumen numérico: `pending`, `resolved` y `total`.\n" +
+"\n" +
+"**4. `legal_questions[]` — Consultas para Legal**\n" +
+"\n" +
+"Es una lista separada de los MC. No se aplica al Documento Maestro.\n" +
+"\n" +
+"| Campo | Qué significa |\n" +
+"|---|---|\n" +
+"| `id` | Identificador de la consulta, por ejemplo `L-001`. |\n" +
+"| `question_es` | Pregunta en español. |\n" +
+"| `context_es` | Contexto en español. |\n" +
+"| `question_en` | Pregunta en inglés. |\n" +
+"| `context_en` | Contexto en inglés. |\n" +
+"| `related_mc` | MC relacionados. Puede quedar vacío. |\n" +
+"| `status` | `pending` o `answered`. |\n" +
+"| `answer` | Respuesta de Legal, si existe. |\n" +
+"\n" +
+"**5. `legal_questions_summary` — resumen de consultas legales**\n" +
+"\n" +
+"Contiene solo tres números y el visor lo recalcula cuando se agregan, editan o responden consultas:\n" +
+"\n" +
+"- `total`: cantidad total de consultas.\n" +
+"- `pending`: pendientes.\n" +
+"- `answered`: respondidas.\n" +
+"\n" +
+"**Regla simple para generar un archivo nuevo**\n" +
+"\n" +
+"- Siempre incluir `metadata` y `changes`.\n" +
+"- Si no hay consultas legales, usar `legal_questions: []` y `legal_questions_summary` en cero, o directamente dejar que el visor las inicialice.\n" +
+"- Los MC van únicamente en `changes[]`.\n" +
+"- Las preguntas funcionales/técnicas van en `metadata.decision_questions_summary`.\n" +
+"- Las dudas legales van únicamente en `legal_questions[]`.\n" +
+"- `legal_questions[]` nunca debe convertirse en cambios del Documento Maestro.\n" +
+"- No inventar IDs ni valores cerrados: conservar el formato MC, DQ y L que corresponda.";
 
 function renderSchemaDoc(){
   const el = document.getElementById('schema-body');
   if(!el) return;
+
+  const quick =
+    '<div class="schema-overview">' +
+      '<div class="schema-step"><span class="schema-num">1</span><strong>metadata</strong><p>Datos generales de la revisión y preguntas funcionales/técnicas.</p></div>' +
+      '<div class="schema-step"><span class="schema-num">2</span><strong>changes[]</strong><p>Los MC: qué se encontró, qué se propone y su trazabilidad.</p></div>' +
+      '<div class="schema-step"><span class="schema-num">3</span><strong>legal_questions[]</strong><p>Consultas separadas para Legal. No modifican el Maestro.</p></div>' +
+      '<div class="schema-step"><span class="schema-num">4</span><strong>legal_questions_summary</strong><p>Totales de consultas pendientes y respondidas.</p></div>' +
+    '</div>' +
+    '<div class="schema-callout"><strong>Para ubicarte rápido:</strong> los MC viven en <code>changes[]</code>; las preguntas funcionales/técnicas viven en <code>metadata.decision_questions_summary</code>; y las dudas jurídicas viven en <code>legal_questions[]</code>.</div>';
+
   const example = {
     metadata: {
-      bloque: "Bloque X — Nombre del bloque",
+      bloque: "Revisión funcional — Bloque X",
       orden: 1,
-      functional_source: "Documento funcional de origen",
+      functional_source: "Contexto funcional vigente",
       master_base: "Maestro_v7.16.md",
-      total_changes: 2,
-      resumen_acciones: { replace_exact: 1, manual_review: 1 },
-      change_summary: {
-        title: "Resumen de cambios",
-        intro: "Qué se modifica a nivel general en este bloque.",
-        sections: [
-          {
-            title: "Modelo funcional",
-            bullets: [
-              { title: "Cambio principal.", text: "Explicación corta del impacto." },
-              "También puede usarse un bullet como texto simple."
-            ]
-          }
-        ],
-        note: "Aclaración final opcional."
+      generated_at: "2026-10-07",
+      total_changes: 1,
+      resumen_acciones: {
+        replace_exact: 1
       },
       decision_questions_summary: {
         "DQ-EJEMPLO-01": {
-          question: "Texto completo de la pregunta a resolver.",
+          question: "¿Qué criterio funcional o técnico hay que definir?",
           status: "pending",
-          affected_ids: ["BX-1.1"]
+          bloque: "Tema relacionado",
+          affected_ids: ["MC-001"]
         }
-      }
+      },
+      decision_questions: {
+        pending: 1,
+        resolved: 0,
+        total: 1
+      },
+      purpose: "Revisar el bloque contra el contexto funcional vigente"
     },
     changes: [
       {
-        id: "BX-1.1",
-        action: "replace_exact",
-        section: "§0.2 Glosario normativo",
-        concept: "Ejemplo de concepto",
+        id: "MC-001",
+        concept: "Nombre del hallazgo",
+        section: "§4.1 Ejemplo",
         md_line: 120,
-        contexto_hallazgo: "Esta parte del Maestro define cómo funciona hoy este concepto dentro del modelo.",
-        resumen_cambio: "Se propone llevar esta definición al modelo común y eliminar la lógica paralela que ya no corresponde.",
-        current_text: "Texto actual tal cual figura en el Maestro.",
+        contexto_hallazgo: "Explica dónde está el problema y por qué importa.",
+        current_text: "Texto actual del Documento Maestro.",
+        action: "replace_exact",
         replacement_text: "Texto propuesto.",
         reason: "Motivo del cambio.",
-        antecedente: "Párrafo narrativo explicando el origen del término.",
-        que_se_conserva: null,
-        impacto_o_tema_relacionado: null,
-        estado: null,
-        bloque_diferido: null,
-        decision_source: "review",
-        change_type: "mechanical",
-        review_priority: "low",
-        needs_human_review: false,
-        review_note: "Ancla conceptual del bloque.",
-        review_group_id: "01-bx-ejemplo",
-        review_group_title: "01 · Bloque X · Ejemplo",
-        decision_question_id: null
-      },
-      {
-        id: "BX-1.2",
-        action: "manual_review",
-        section: "§4.1.2 Segmento D",
-        concept: "Caso a resolver con análisis",
-        md_line: 340,
-        current_text: "Texto actual ambiguo.",
-        replacement_text: null,
-        reason: "Requiere definir un criterio antes de tocar el texto.",
-        antecedente: null,
-        que_se_conserva: null,
-        impacto_o_tema_relacionado: null,
-        estado: null,
-        bloque_diferido: null,
-        decision_source: "review",
-        change_type: "pending",
-        review_priority: "high",
+        resumen_cambio: "Explicación corta de qué cambia.",
+        estado: "Propuesto",
+        change_type: "conceptual",
+        review_priority: "medium",
         needs_human_review: true,
-        review_note: null,
-        review_group_id: "01-bx-ejemplo",
-        review_group_title: "01 · Bloque X · Ejemplo",
-        decision_question_id: "DQ-EJEMPLO-01"
+        review_group_id: "01-ejemplo",
+        review_group_title: "01 · Ejemplo",
+        decision_question_id: "DQ-EJEMPLO-01",
+        review_order: 1
       }
-    ]
+    ],
+    legal_questions: [
+      {
+        id: "L-001",
+        question_es: "Pregunta para Legal.",
+        context_es: "Contexto necesario para entender la consulta.",
+        question_en: "Question for Legal.",
+        context_en: "Context needed to understand the question.",
+        related_mc: ["MC-001"],
+        status: "pending",
+        answer: null
+      }
+    ],
+    legal_questions_summary: {
+      total: 1,
+      pending: 1,
+      answered: 0
+    }
   };
-  el.innerHTML = renderMarkdown(SCHEMA_DOC_MD) +
-    '<div class="field"><div class="lbl">Ejemplo mínimo completo, listo para copiar como plantilla</div>' +
+
+  el.innerHTML = quick + renderMarkdown(SCHEMA_DOC_MD) +
+    '<div class="field"><div class="lbl">Ejemplo simple de la estructura completa actual</div>' +
     '<pre class="schema-example"><code>' + escapeHtml(JSON.stringify(example, null, 2)) + '</code></pre></div>';
 }
 renderSchemaDoc();
