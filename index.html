@@ -1719,24 +1719,36 @@ function renderSchemaDoc(){
     legal_questions: [
       {
         id: "L-001",
-        question_es: "Pregunta para Legal.",
-        context_es: "Contexto necesario para entender la consulta.",
-        question_en: "Question for Legal.",
-        context_en: "Context needed to understand the question.",
-        related_mc: ["MC-001"],
+        question_es: "¿La responsabilidad funcional por Guests indirectos requiere una cláusula contractual específica?",
+        context_es: "La definición funcional permite que un Resident delegue a un Guest la capacidad de generar nuevos Guests para la misma Unit. Se necesita validar qué responsabilidad jurídica corresponde y qué evidencia debería conservar Merion.",
+        question_en: "Does functional responsibility for indirect Guests require a specific contractual clause?",
+        context_en: "The functional definition allows a Resident to delegate to a Guest the ability to create additional Guests for the same Unit. Legal validation is required regarding liability and the evidence Merion should retain.",
+        related_mc: ["MC-002", "MC-033", "MC-070"],
         status: "pending",
-        answer: null
+        answer: null,
+        answered_at: null
+      },
+      {
+        id: "L-002",
+        question_es: "¿Qué evidencia debe conservar Merion para demostrar la aceptación de una autorización?",
+        context_es: "La consulta busca confirmar qué datos mínimos deben quedar registrados cuando una autorización requiere aceptación o consentimiento.",
+        question_en: "What evidence should Merion retain to prove acceptance of an authorization?",
+        context_en: "This question seeks to confirm the minimum data that must be recorded when an authorization requires acceptance or consent.",
+        related_mc: [],
+        status: "answered",
+        answer: "Ejemplo de respuesta cargada por Legal.",
+        answered_at: "2026-10-07"
       }
     ],
     legal_questions_summary: {
-      total: 1,
+      total: 2,
       pending: 1,
-      answered: 0
+      answered: 1
     }
   };
 
   el.innerHTML = quick + renderMarkdown(SCHEMA_DOC_MD) +
-    '<div class="field"><div class="lbl">Ejemplo simple de la estructura completa actual</div>' +
+    '<div class="schema-callout"><strong>Importante:</strong> el ejemplo de abajo ahora incluye también <code>legal_questions[]</code> y <code>legal_questions_summary</code>, con una consulta pendiente y otra respondida para mostrar ambos casos.</div><div class="field"><div class="lbl">Ejemplo completo de la estructura actual</div>' +
     '<pre class="schema-example"><code>' + escapeHtml(JSON.stringify(example, null, 2)) + '</code></pre></div>';
 }
 renderSchemaDoc();
