@@ -598,7 +598,7 @@ details.detail-toggle summary::before{ color:var(--accent); }
 /* Guía visual de estructura JSON */
 .schema-overview{
   display:grid;
-  grid-template-columns:repeat(4,minmax(0,1fr));
+  grid-template-columns:repeat(5,minmax(0,1fr));
   gap:10px;
   margin:4px 0 18px;
 }
@@ -652,6 +652,48 @@ details.detail-toggle summary::before{ color:var(--accent); }
   a{ color:inherit; text-decoration:none; }
   @page{ size:A4; margin:16mm; }
 }
+
+/* =========================================================
+   FUNCTIONAL CONTEXT
+   ========================================================= */
+#panel-functional-context{border-color:#B9D8CE !important;background:#F4FBF8 !important;}
+.nav-context{background:#DFF3EE !important;color:#17685E !important;border:1px solid #A9DCD1 !important;}
+.fc-toolbar{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:14px;}
+.fc-toolbar-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.fc-toolbar button,.fc-section-actions button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 11px;cursor:pointer;font-family:inherit;}
+.fc-toolbar button.primary,.fc-section-actions button.primary{background:var(--accent);color:#fff;border-color:var(--accent);}
+.fc-meta-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:10px;margin-bottom:14px;}
+.fc-meta-field label{display:block;font-size:.76rem;font-weight:700;color:var(--ink-muted);margin-bottom:5px;}
+.fc-meta-field input{width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:8px;padding:9px 10px;font:inherit;background:#fff;}
+.fc-meta-readonly{min-height:38px;display:flex;align-items:center;border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:#F8FAFB;color:var(--ink-muted);font-size:.86rem;box-sizing:border-box;}
+.fc-search-row{display:flex;gap:10px;align-items:center;margin:10px 0 12px;flex-wrap:wrap;}
+.fc-search-row input{flex:1;min-width:220px;border:1px solid var(--line);border-radius:8px;padding:9px 10px;font:inherit;}
+.fc-sections-nav{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px;}
+.fc-nav-chip{display:inline-flex;align-items:center;gap:5px;padding:6px 9px;border:1px solid #BFD9D1;border-radius:999px;background:#fff;color:#17685E;text-decoration:none;font-size:.8rem;}
+.fc-empty{color:var(--ink-faint);font-size:.88rem;padding:10px 0;}
+.fc-section-card{border:1px solid #CBE3DC;border-radius:12px;background:#fff;margin:10px 0;padding:14px;scroll-margin-top:92px;}
+.fc-section-card.fc-highlight{outline:3px solid rgba(23,104,94,.24);}
+.fc-section-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:10px;}
+.fc-section-id{font-size:.75rem;font-weight:800;color:#17685E;background:#EAF7F3;border-radius:999px;padding:4px 7px;display:inline-block;margin-bottom:5px;}
+.fc-section-title{font-size:1rem;font-weight:800;color:var(--ink);}
+.fc-section-content{line-height:1.6;color:var(--ink);}
+.fc-section-actions{display:flex;gap:6px;flex-wrap:wrap;}
+.fc-related{margin-top:12px;padding-top:10px;border-top:1px solid var(--line);font-size:.82rem;color:var(--ink-muted);}
+.fc-related a{margin-right:7px;color:var(--accent);font-weight:700;text-decoration:none;}
+.fc-edit-grid{display:grid;grid-template-columns:1fr 2fr;gap:10px;margin-top:10px;}
+.fc-edit-grid .full{grid-column:1/-1;}
+.fc-edit-grid label{display:block;font-size:.75rem;font-weight:700;color:var(--ink-muted);margin-bottom:4px;}
+.fc-edit-grid input,.fc-edit-grid textarea{width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:8px;padding:9px 10px;font:inherit;background:#fff;}
+.fc-edit-grid textarea{min-height:150px;resize:vertical;}
+.fc-warning{border-left:4px solid #D58A2C;background:#FFF6E9;color:#71420D;padding:11px 13px;border-radius:8px;margin:8px 0 14px;font-size:.86rem;line-height:1.45;}
+.fc-safety{border-left:4px solid #4C8B7C;background:#EEF8F5;padding:11px 13px;border-radius:8px;margin:8px 0 14px;font-size:.85rem;line-height:1.45;}
+.context-links{margin:10px 0 2px;padding:10px 12px;border-radius:9px;background:#F0F8F5;border:1px solid #CBE3DC;}
+.context-links-label{font-size:.75rem;font-weight:800;color:#17685E;margin-bottom:6px;}
+.context-link-btn{display:inline-block;margin:2px 6px 2px 0;border:1px solid #A9DCD1;border-radius:999px;background:#fff;color:#17685E;padding:5px 8px;font-size:.78rem;font-weight:700;cursor:pointer;text-decoration:none;}
+.context-review-warning{display:inline-block;margin-top:7px;padding:5px 8px;border-radius:7px;background:#FFF1DD;color:#8A4A0C;font-size:.76rem;font-weight:700;}
+@media(max-width:850px){.fc-meta-grid{grid-template-columns:1fr 1fr}.fc-edit-grid{grid-template-columns:1fr;}.fc-edit-grid .full{grid-column:auto;}}
+@media(max-width:520px){.fc-meta-grid{grid-template-columns:1fr}.fc-toolbar{align-items:stretch}.fc-toolbar-actions{width:100%}.fc-toolbar-actions button{flex:1}.fc-section-head{flex-direction:column}.fc-section-actions{width:100%}}
+
 </style>
 </head>
 <body>
@@ -741,6 +783,7 @@ details.detail-toggle summary::before{ color:var(--accent); }
   <nav id="report-nav">
     <a class="nav-link nav-total" href="#panel-summary">Totales</a>
     <a class="nav-link nav-changes" href="#panel-change-summary" id="nav-change-summary">Resumen de cambios</a>
+    <a class="nav-link nav-context" href="#panel-functional-context" id="nav-functional-context">Contexto funcional</a>
     <a class="nav-link nav-decisions" href="#panel-dq">Preguntas funcionales / técnicas</a>
     <a class="nav-link nav-legal" href="#panel-legal">Consultas para Legal</a>
     <div class="nav-groups" id="nav-groups">
@@ -771,6 +814,36 @@ details.detail-toggle summary::before{ color:var(--accent); }
       <details class="dq-panel-details" open>
         <summary class="panel-title dq-panel-summary">Resumen de cambios</summary>
         <div class="dq-panel-body" id="change-summary-container"></div>
+      </details>
+    </section>
+
+    <section class="panel" id="panel-functional-context" style="display:none;">
+      <details class="dq-panel-details" open>
+        <summary class="panel-title dq-panel-summary">
+          Contexto funcional
+          <span class="dq-panel-count" id="fc-panel-count"></span>
+          <span class="info-tooltip" title="Documentación funcional de referencia incluida en el JSON. No se aplica directamente al Documento Maestro.">ⓘ</span>
+        </summary>
+        <div class="dq-panel-body">
+          <div class="fc-safety"><strong>Referencia funcional:</strong> este contenido sirve para entender la fuente utilizada al generar los hallazgos. Editarlo no modifica automáticamente <code>changes[]</code>, las consultas legales ni las decisiones.</div>
+          <div id="fc-version-warning" class="fc-warning" style="display:none;"></div>
+          <div class="fc-toolbar">
+            <div id="fc-source-label" style="font-weight:700;color:var(--ink-muted);"></div>
+            <div class="fc-toolbar-actions">
+              <button type="button" id="fc-add-section-btn" class="primary">Agregar sección</button>
+              <button type="button" id="fc-download-md-btn">Descargar Markdown</button>
+              <button type="button" id="fc-download-json-btn">Descargar JSON</button>
+            </div>
+          </div>
+          <div class="fc-meta-grid" id="fc-meta-grid"></div>
+          <div class="fc-search-row">
+            <input type="text" id="fc-search" placeholder="Buscar dentro del contexto funcional...">
+            <span id="fc-search-count" style="font-size:.8rem;color:var(--ink-muted);"></span>
+          </div>
+          <div class="fc-sections-nav" id="fc-sections-nav"></div>
+          <div id="fc-sections-list"></div>
+          <div class="fc-empty" id="fc-empty">Este JSON no contiene <code>functional_context</code>. El resto del visor funciona normalmente.</div>
+        </div>
       </details>
     </section>
 
@@ -1070,10 +1143,14 @@ async function handleFiles(fileList){
       fileName: file.name,
       metadata: normalized.metadata,
       changes: normalized.changes,
+      functional_context: normalized.functional_context,
       legal_questions: normalized.legal_questions || [],
       legal_questions_summary: normalized.legal_questions_summary || {},
       raw_metadata: JSON.parse(JSON.stringify(parsed.metadata || {})),
-      raw_changes: JSON.parse(JSON.stringify(parsed.changes || []))
+      raw_changes: JSON.parse(JSON.stringify(parsed.changes || [])),
+      raw_functional_context: parsed.functional_context ? JSON.parse(JSON.stringify(parsed.functional_context)) : null,
+      raw_full: JSON.parse(JSON.stringify(parsed)),
+      context_dirty_refs: {}
     });
   }
   if(replacedLabels.length){
@@ -1166,6 +1243,8 @@ function normalizeReviewData(raw){
       review_group_id: nz(c.review_group_id),
       review_group_title: nz(c.review_group_title),
       decision_question_id: nz(c.decision_question_id),
+      context_reference: Array.isArray(c.context_reference) ? c.context_reference.slice() : [],
+      functional_context_refs: Array.isArray(c.functional_context_refs) ? c.functional_context_refs.slice() : [],
       // Optional traceability fields, seen in consolidated files that merge
       // several earlier batches into one. Not required, but preserved
       // rather than silently dropped when present.
@@ -1189,11 +1268,26 @@ function normalizeReviewData(raw){
       answer: nz(q.answer !== undefined ? q.answer : q.respuesta)
     };
   }) : [];
+  const fcRaw = (raw.functional_context && typeof raw.functional_context === 'object') ? raw.functional_context : null;
+  const functionalContext = fcRaw ? {
+    title: nz(fcRaw.title),
+    version: nz(fcRaw.version),
+    updated_at: nz(fcRaw.updated_at),
+    source: nz(fcRaw.source),
+    sections: Array.isArray(fcRaw.sections) ? fcRaw.sections.map(function(s){
+      return Object.assign({}, s, {
+        id: nz(s.id),
+        title: nz(s.title),
+        content: nz(s.content)
+      });
+    }) : []
+  } : null;
   return {
     metadata: {
       bloque: nz(meta.bloque),
       orden: nz(meta.orden),
       functional_source: nz(meta.functional_source),
+      functional_context_version_used: nz(meta.functional_context_version_used),
       master_base: nz(meta.master_base),
       total_changes: nz(meta.total_changes),
       resumen_acciones: meta.resumen_acciones || {},
@@ -1214,6 +1308,7 @@ function normalizeReviewData(raw){
       change_summary: nz(meta.change_summary)
     },
     changes: changes,
+    functional_context: functionalContext,
     legal_questions: legalQuestions,
     legal_questions_summary: raw.legal_questions_summary || {}
   };
@@ -1244,6 +1339,8 @@ function buildCombinedView(sources){
       changes.push(Object.assign({}, c, {
         _sourceId: src.sourceId,
         _sourceLabel: label,
+        _functionalContext: src.functional_context,
+        _contextDirtyRefs: src.context_dirty_refs || {},
         _anchorId: 'change-' + cssSafe(src.sourceId) + '__' + cssSafe(c.id)
       }));
     });
@@ -1564,7 +1661,7 @@ function renderBadge(text, colorClass){
 const SCHEMA_DOC_MD =
 "**Qué tiene hoy el JSON**\n" +
 "\n" +
-"El archivo actual tiene **4 bloques principales**: `metadata`, `changes`, `legal_questions` y `legal_questions_summary`. Las preguntas funcionales/técnicas no son un quinto bloque: su detalle está dentro de `metadata.decision_questions_summary`.\n" +
+"El archivo actual puede tener **5 bloques principales**: `metadata`, `functional_context`, `changes`, `legal_questions` y `legal_questions_summary`. Las preguntas funcionales/técnicas no son un quinto bloque: su detalle está dentro de `metadata.decision_questions_summary`.\n" +
 "\n" +
 "**1. `metadata` — información general de la revisión**\n" +
 "\n" +
@@ -1592,7 +1689,13 @@ const SCHEMA_DOC_MD =
 "| `cross_reference_validation` | Validación de referencias internas del Maestro. |\n" +
 "| `sweep_2026_10_06` | Registro del barrido transversal realizado en esa revisión. |\n" +
 "\n" +
-"**2. `changes[]` — los hallazgos MC**\n" +
+"**2. `functional_context` — contexto funcional de referencia**\n" +
+"\n" +
+"Puede incluir `title`, `version`, `updated_at`, `source` y `sections[]`. Cada sección puede tener `id`, `title` y `content`. Este bloque es documentación de referencia y no se aplica directamente al Documento Maestro.\n" +
+"\n" +
+"Los MC pueden declarar `context_reference` o `functional_context_refs` para vincularse con IDs de secciones existentes. El visor solo muestra relaciones declaradas; no las infiere.\n" +
+"\n" +
+"**3. `changes[]` — los hallazgos MC**\n" +
 "\n" +
 "Cada objeto representa un hallazgo o cambio. Para entenderlo rápido, los campos se pueden leer en 5 grupos:\n" +
 "\n" +
@@ -1606,7 +1709,7 @@ const SCHEMA_DOC_MD =
 "\n" +
 "**Valores habituales de `action`:** `replace_exact`, `replace_block`, `skip`, `delete` y `manual_review`.\n" +
 "\n" +
-"**3. Preguntas funcionales / técnicas**\n" +
+"**4. Preguntas funcionales / técnicas**\n" +
 "\n" +
 "Se guardan dentro de `metadata.decision_questions_summary`. Cada pregunta puede contener:\n" +
 "\n" +
@@ -1622,7 +1725,7 @@ const SCHEMA_DOC_MD =
 "\n" +
 "`metadata.decision_questions` guarda solamente el resumen numérico: `pending`, `resolved` y `total`.\n" +
 "\n" +
-"**4. `legal_questions[]` — Consultas para Legal**\n" +
+"**5. `legal_questions[]` — Consultas para Legal**\n" +
 "\n" +
 "Es una lista separada de los MC. No se aplica al Documento Maestro.\n" +
 "\n" +
@@ -1637,7 +1740,7 @@ const SCHEMA_DOC_MD =
 "| `status` | `pending` o `answered`. |\n" +
 "| `answer` | Respuesta de Legal, si existe. |\n" +
 "\n" +
-"**5. `legal_questions_summary` — resumen de consultas legales**\n" +
+"**6. `legal_questions_summary` — resumen de consultas legales**\n" +
 "\n" +
 "Contiene solo tres números y el visor lo recalcula cuando se agregan, editan o responden consultas:\n" +
 "\n" +
@@ -1662,11 +1765,12 @@ function renderSchemaDoc(){
   const quick =
     '<div class="schema-overview">' +
       '<div class="schema-step"><span class="schema-num">1</span><strong>metadata</strong><p>Datos generales de la revisión y preguntas funcionales/técnicas.</p></div>' +
-      '<div class="schema-step"><span class="schema-num">2</span><strong>changes[]</strong><p>Los MC: qué se encontró, qué se propone y su trazabilidad.</p></div>' +
-      '<div class="schema-step"><span class="schema-num">3</span><strong>legal_questions[]</strong><p>Consultas separadas para Legal. No modifican el Maestro.</p></div>' +
-      '<div class="schema-step"><span class="schema-num">4</span><strong>legal_questions_summary</strong><p>Totales de consultas pendientes y respondidas.</p></div>' +
+      '<div class="schema-step"><span class="schema-num">2</span><strong>functional_context</strong><p>Fuente funcional consolidada usada como referencia para los MC.</p></div>' +
+      '<div class="schema-step"><span class="schema-num">3</span><strong>changes[]</strong><p>Los MC: qué se encontró, qué se propone y su trazabilidad.</p></div>' +
+      '<div class="schema-step"><span class="schema-num">4</span><strong>legal_questions[]</strong><p>Consultas separadas para Legal. No modifican el Maestro.</p></div>' +
+      '<div class="schema-step"><span class="schema-num">5</span><strong>legal_questions_summary</strong><p>Totales de consultas pendientes y respondidas.</p></div>' +
     '</div>' +
-    '<div class="schema-callout"><strong>Para ubicarte rápido:</strong> los MC viven en <code>changes[]</code>; las preguntas funcionales/técnicas viven en <code>metadata.decision_questions_summary</code>; y las dudas jurídicas viven en <code>legal_questions[]</code>.</div>';
+    '<div class="schema-callout"><strong>Para ubicarte rápido:</strong> el contexto fuente vive en <code>functional_context</code>; los MC viven en <code>changes[]</code>; las preguntas funcionales/técnicas viven en <code>metadata.decision_questions_summary</code>; y las dudas jurídicas viven en <code>legal_questions[]</code>.</div>';
 
   const example = {
     metadata: {
@@ -1694,6 +1798,19 @@ function renderSchemaDoc(){
       },
       purpose: "Revisar el bloque contra el contexto funcional vigente"
     },
+    functional_context: {
+      title: "Contexto funcional — Ejemplo",
+      version: "v0.1",
+      updated_at: "2026-10-08",
+      source: "Contexto funcional consolidado",
+      sections: [
+        {
+          id: "fc_ejemplo",
+          title: "Definición funcional de ejemplo",
+          content: "Contenido funcional de referencia."
+        }
+      ]
+    },
     changes: [
       {
         id: "MC-001",
@@ -1713,6 +1830,7 @@ function renderSchemaDoc(){
         review_group_id: "01-ejemplo",
         review_group_title: "01 · Ejemplo",
         decision_question_id: "DQ-EJEMPLO-01",
+        context_reference: ["fc_ejemplo"],
         review_order: 1
       }
     ],
@@ -2511,6 +2629,216 @@ async function handlePreviousReviewFiles(fileList){
 }
 
 
+
+/* =========================================================
+   FUNCTIONAL CONTEXT
+   Documentation-only: never applies changes to the Master.
+   ========================================================= */
+let ACTIVE_FC_SOURCE_ID = null;
+let FC_EDIT_SECTION_ID = null;
+
+function functionalContextSource(){
+  if(ACTIVE_FC_SOURCE_ID){
+    const found=SOURCES.find(function(s){ return s.sourceId===ACTIVE_FC_SOURCE_ID && s.functional_context; });
+    if(found) return found;
+  }
+  const first=SOURCES.find(function(s){ return !!s.functional_context; });
+  if(first) ACTIVE_FC_SOURCE_ID=first.sourceId;
+  return first || null;
+}
+
+function contextRefsForChange(c){
+  const a=Array.isArray(c.context_reference)?c.context_reference:[];
+  const b=Array.isArray(c.functional_context_refs)?c.functional_context_refs:[];
+  const out=[]; const seen={};
+  a.concat(b).forEach(function(x){ if(x!==null && x!==undefined && !seen[String(x)]){ seen[String(x)]=1; out.push(String(x)); } });
+  return out;
+}
+
+function fcAnchor(sourceId, sectionId){ return 'fc-'+cssSafe(sourceId)+'__'+cssSafe(sectionId); }
+
+function relatedChangesForContext(src, sectionId){
+  return (src.changes||[]).filter(function(c){ return contextRefsForChange(c).indexOf(String(sectionId))!==-1; });
+}
+
+function markContextRelatedForReview(src, sectionId){
+  if(!src || !sectionId) return;
+  src.context_dirty_refs=src.context_dirty_refs||{};
+  src.context_dirty_refs[String(sectionId)]=true;
+}
+
+function slugifyContextId(title){
+  let s=String(title||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'');
+  if(!s) s='seccion';
+  const src=functionalContextSource();
+  const used=new Set(src && src.functional_context && Array.isArray(src.functional_context.sections) ? src.functional_context.sections.map(function(x){return String(x.id||'');}) : []);
+  let candidate=s, n=2;
+  while(used.has(candidate)){ candidate=s+'_'+n++; }
+  return candidate;
+}
+
+function renderFunctionalContext(){
+  const panel=document.getElementById('panel-functional-context');
+  const nav=document.getElementById('nav-functional-context');
+  const empty=document.getElementById('fc-empty');
+  const list=document.getElementById('fc-sections-list');
+  const meta=document.getElementById('fc-meta-grid');
+  const chips=document.getElementById('fc-sections-nav');
+  const count=document.getElementById('fc-panel-count');
+  const warning=document.getElementById('fc-version-warning');
+  const sourceLabel=document.getElementById('fc-source-label');
+  if(!panel||!list) return;
+
+  const withContext=SOURCES.filter(function(s){return !!s.functional_context;});
+  if(!withContext.length){
+    panel.style.display=''; if(nav) nav.style.display='';
+    empty.style.display='block'; list.innerHTML=''; meta.innerHTML=''; chips.innerHTML=''; count.textContent=''; sourceLabel.textContent=''; warning.style.display='none';
+    return;
+  }
+  panel.style.display=''; if(nav) nav.style.display=''; empty.style.display='none';
+  let src=functionalContextSource();
+  if(!src || !src.functional_context){ src=withContext[0]; ACTIVE_FC_SOURCE_ID=src.sourceId; }
+  const fc=src.functional_context;
+  sourceLabel.innerHTML = withContext.length>1
+    ? '<label style="font-size:.75rem;margin-right:6px;">Bloque:</label><select id="fc-source-select">'+withContext.map(function(s){return '<option value="'+escapeHtml(s.sourceId)+'" '+(s.sourceId===src.sourceId?'selected':'')+'>'+escapeHtml(s.metadata.bloque||s.fileName)+'</option>';}).join('')+'</select>'
+    : escapeHtml(src.metadata.bloque||src.fileName);
+  const sourceSelect=document.getElementById('fc-source-select');
+  if(sourceSelect) sourceSelect.addEventListener('change',function(){ACTIVE_FC_SOURCE_ID=this.value;FC_EDIT_SECTION_ID=null;renderFunctionalContext();});
+
+  count.textContent=(fc.sections||[]).length ? '('+(fc.sections||[]).length+')' : '';
+  meta.innerHTML =
+    '<div class="fc-meta-field"><label>Título</label><input id="fc-title-input" value="'+escapeHtml(fc.title||'')+'"></div>'+
+    '<div class="fc-meta-field"><label>Versión</label><input id="fc-version-input" value="'+escapeHtml(fc.version||'')+'"></div>'+
+    '<div class="fc-meta-field"><label>Actualizado</label><div class="fc-meta-readonly">'+escapeHtml(fc.updated_at||'—')+'</div></div>'+
+    '<div class="fc-meta-field"><label>Fuente</label><div class="fc-meta-readonly">'+escapeHtml(fc.source||'—')+'</div></div>';
+  document.getElementById('fc-title-input').addEventListener('change',function(){fc.title=this.value;});
+  document.getElementById('fc-version-input').addEventListener('change',function(){
+    if(fc.version!==this.value){ fc.version=this.value; (fc.sections||[]).forEach(function(s){if(s.id) markContextRelatedForReview(src,s.id);}); renderFunctionalContext(); rebuildReviewGroupsOnly(); }
+  });
+
+  const used=src.metadata.functional_context_version_used;
+  if(used && fc.version && String(used)!==String(fc.version)){
+    warning.style.display='block';
+    warning.innerHTML='<strong>Revisar coherencia:</strong> los cambios fueron generados usando el contexto <code>'+escapeHtml(used)+'</code>, pero este archivo contiene <code>'+escapeHtml(fc.version)+'</code>. Revisá los MC relacionados antes de confirmarlos.';
+  }else warning.style.display='none';
+
+  chips.innerHTML=(fc.sections||[]).map(function(s){return '<a class="fc-nav-chip" href="#'+fcAnchor(src.sourceId,s.id||'sin-id')+'">'+escapeHtml(s.title||s.id||'Sin título')+'</a>';}).join('');
+  renderFunctionalContextSections(src);
+}
+
+function rebuildReviewGroupsOnly(){
+  if(!SOURCES.length) return;
+  const combined=buildCombinedView(SOURCES);
+  DQ_INDEX=combined.dqIndex;
+  renderReviewGroups(combined.changes);
+  attachFindingNoteHandlers(combined.changes);
+  attachLegalQuestionButtons();
+  attachContextJumpHandlers();
+  updateFindingNotesCount(combined.changes);
+  applyFilters();
+}
+
+function renderFunctionalContextSections(src){
+  const list=document.getElementById('fc-sections-list');
+  const search=(document.getElementById('fc-search').value||'').trim().toLowerCase();
+  const sections=(src.functional_context.sections||[]);
+  const visible=sections.filter(function(s){return !search || [s.id,s.title,s.content].some(function(v){return String(v||'').toLowerCase().indexOf(search)!==-1;});});
+  document.getElementById('fc-search-count').textContent=search ? (visible.length+' de '+sections.length+' secciones') : '';
+  if(!sections.length){list.innerHTML='<div class="fc-empty">El contexto funcional está cargado, pero todavía no tiene secciones.</div>';return;}
+  if(!visible.length){list.innerHTML='<div class="fc-empty">No hay secciones que coincidan con la búsqueda.</div>';return;}
+  list.innerHTML=visible.map(function(s){
+    const sid=String(s.id||'');
+    const related=relatedChangesForContext(src,sid);
+    const editing=FC_EDIT_SECTION_ID===sid;
+    let h='<div class="fc-section-card" id="'+fcAnchor(src.sourceId,sid||'sin-id')+'">';
+    h+='<div class="fc-section-head"><div><div class="fc-section-id">'+escapeHtml(sid||'sin id')+'</div><div class="fc-section-title">'+escapeHtml(s.title||'Sin título')+'</div></div>';
+    h+='<div class="fc-section-actions"><button type="button" class="fc-edit-btn" data-id="'+escapeHtml(sid)+'">'+(editing?'Cerrar edición':'Editar')+'</button><button type="button" class="fc-delete-btn" data-id="'+escapeHtml(sid)+'">Quitar</button></div></div>';
+    if(editing){
+      h+='<div class="fc-edit-grid"><div><label>ID</label><input class="fc-edit-id" value="'+escapeHtml(sid)+'"></div><div><label>Título</label><input class="fc-edit-title" value="'+escapeHtml(s.title||'')+'"></div><div class="full"><label>Contenido</label><textarea class="fc-edit-content">'+escapeHtml(s.content||'')+'</textarea></div><div class="full fc-section-actions"><button type="button" class="primary fc-save-section" data-id="'+escapeHtml(sid)+'">Guardar sección</button></div></div>';
+    }else{
+      h+='<div class="fc-section-content">'+renderMarkdown(s.content||'')+'</div>';
+    }
+    h+='<div class="fc-related"><strong>MC relacionados declarados:</strong> '+(related.length?related.map(function(c){return '<a href="#'+changeAnchorFor(src.sourceId,c.id)+'">'+escapeHtml(c.id)+'</a>';}).join(''):'Ninguno')+'</div>';
+    if(src.context_dirty_refs && src.context_dirty_refs[sid]) h+='<div class="context-review-warning">Contexto editado en el visor · los MC relacionados requieren nueva revisión.</div>';
+    h+='</div>'; return h;
+  }).join('');
+
+  list.querySelectorAll('.fc-edit-btn').forEach(function(btn){btn.addEventListener('click',function(){FC_EDIT_SECTION_ID=(FC_EDIT_SECTION_ID===btn.dataset.id?null:btn.dataset.id);renderFunctionalContextSections(src);});});
+  list.querySelectorAll('.fc-delete-btn').forEach(function(btn){btn.addEventListener('click',function(){
+    const id=btn.dataset.id;
+    if(!confirm('¿Quitar la sección "'+id+'" del contexto funcional? Esta acción solo se realizará si confirmás.')) return;
+    markContextRelatedForReview(src,id);
+    src.functional_context.sections=src.functional_context.sections.filter(function(s){return String(s.id)!==String(id);});
+    FC_EDIT_SECTION_ID=null;renderFunctionalContext();rebuildReviewGroupsOnly();
+  });});
+  list.querySelectorAll('.fc-save-section').forEach(function(btn){btn.addEventListener('click',function(){
+    const card=btn.closest('.fc-section-card'); const oldId=btn.dataset.id;
+    const newId=card.querySelector('.fc-edit-id').value.trim(); const title=card.querySelector('.fc-edit-title').value.trim(); const content=card.querySelector('.fc-edit-content').value;
+    if(!newId){alert('El ID de la sección no puede quedar vacío.');return;}
+    const duplicate=src.functional_context.sections.some(function(s){return String(s.id)===newId && String(s.id)!==oldId;});
+    if(duplicate){alert('Ya existe una sección con ese ID.');return;}
+    const sec=src.functional_context.sections.find(function(s){return String(s.id)===oldId;}); if(!sec)return;
+    if(oldId!==newId || sec.title!==title || sec.content!==content){ markContextRelatedForReview(src,oldId); markContextRelatedForReview(src,newId); }
+    sec.id=newId; sec.title=title; sec.content=content; FC_EDIT_SECTION_ID=null; renderFunctionalContext(); rebuildReviewGroupsOnly();
+  });});
+}
+
+function addFunctionalContextSection(){
+  const src=functionalContextSource();
+  if(!src){alert('Primero cargá un JSON que incluya functional_context.');return;}
+  const title=prompt('Título de la nueva sección:','Nueva sección'); if(title===null)return;
+  const id=slugifyContextId(title);
+  src.functional_context.sections.push({id:id,title:title.trim()||'Nueva sección',content:''});
+  FC_EDIT_SECTION_ID=id; renderFunctionalContext();
+  setTimeout(function(){const el=document.getElementById(fcAnchor(src.sourceId,id)); if(el)el.scrollIntoView({behavior:'smooth',block:'start'});},0);
+}
+
+function contextPayload(src){
+  if(!src||!src.functional_context)return null;
+  const raw=src.raw_functional_context ? JSON.parse(JSON.stringify(src.raw_functional_context)) : {};
+  raw.title=src.functional_context.title;
+  raw.version=src.functional_context.version;
+  if(src.functional_context.updated_at!==undefined && src.functional_context.updated_at!==null) raw.updated_at=src.functional_context.updated_at;
+  if(src.functional_context.source!==undefined && src.functional_context.source!==null) raw.source=src.functional_context.source;
+  raw.sections=(src.functional_context.sections||[]).map(function(s){return JSON.parse(JSON.stringify(s));});
+  return raw;
+}
+
+function downloadFunctionalContextMarkdown(){
+  const src=functionalContextSource(); if(!src||!src.functional_context){alert('No hay contexto funcional cargado.');return;}
+  const fc=src.functional_context; let md='# '+(fc.title||'Contexto funcional')+'\n\n';
+  if(fc.version) md+='Versión: '+fc.version+'\n\n';
+  if(fc.updated_at) md+='Actualizado: '+fc.updated_at+'\n\n';
+  if(fc.source) md+='Fuente: '+fc.source+'\n\n';
+  (fc.sections||[]).forEach(function(s){md+='## '+(s.title||s.id||'Sección')+'\n\n'+(s.content||'')+'\n\n';});
+  downloadFile(safeExportName(fc.title||'contexto-funcional')+'.md',md,'text/markdown');
+}
+function downloadFunctionalContextJSON(){
+  const src=functionalContextSource(); if(!src||!src.functional_context){alert('No hay contexto funcional cargado.');return;}
+  downloadFile(safeExportName(src.functional_context.title||'contexto-funcional')+'.json',JSON.stringify(contextPayload(src),null,2),'application/json');
+}
+
+function renderContextLinksForChange(c){
+  const refs=contextRefsForChange(c); if(!refs.length)return '';
+  const fc=c._functionalContext; if(!fc)return '<div class="context-links"><div class="context-links-label">Contexto funcional relacionado</div><span style="font-size:.8rem;color:var(--ink-muted);">El MC declara referencias, pero este JSON no incluye <code>functional_context</code>.</span></div>';
+  const known=new Set((fc.sections||[]).map(function(s){return String(s.id);}));
+  let html='<div class="context-links"><div class="context-links-label">Contexto funcional relacionado</div>';
+  refs.forEach(function(ref){
+    if(known.has(String(ref))) html+='<a class="context-link-btn" href="#'+fcAnchor(c._sourceId,ref)+'" data-fc-source="'+escapeHtml(c._sourceId)+'" data-fc-ref="'+escapeHtml(ref)+'">Ver '+escapeHtml(ref)+'</a>';
+    else html+='<span class="context-link-btn" style="opacity:.65;cursor:default;">'+escapeHtml(ref)+' (no encontrado)</span>';
+  });
+  const dirty=refs.some(function(r){return c._contextDirtyRefs && c._contextDirtyRefs[String(r)];});
+  if(dirty) html+='<div class="context-review-warning">El contexto relacionado fue editado en el visor. Este MC requiere nueva revisión; su propuesta no fue modificada automáticamente.</div>';
+  html+='</div>'; return html;
+}
+
+function attachContextJumpHandlers(){
+  document.querySelectorAll('.context-link-btn[data-fc-ref]').forEach(function(a){a.addEventListener('click',function(){
+    ACTIVE_FC_SOURCE_ID=a.dataset.fcSource; renderFunctionalContext();
+    setTimeout(function(){const el=document.getElementById(fcAnchor(a.dataset.fcSource,a.dataset.fcRef)); if(el){el.classList.add('fc-highlight');setTimeout(function(){el.classList.remove('fc-highlight');},1800);}},30);
+  });});
+}
+
 /* =========================================================
    LEGAL QUESTIONS
    legal_questions[] is review-only material. It is never
@@ -2697,12 +3025,16 @@ function safeExportName(text){
 
 function completeReviewPayload(src){
   const summary=recalcLegalSummary(src);
-  return {
-    metadata: JSON.parse(JSON.stringify(src.raw_metadata || src.metadata || {})),
-    changes: JSON.parse(JSON.stringify(src.raw_changes || src.changes || [])),
-    legal_questions: (src.legal_questions || []).map(legalQuestionToExport),
-    legal_questions_summary: summary
-  };
+  // Start from the original object so unknown/new properties are never lost.
+  const payload=JSON.parse(JSON.stringify(src.raw_full || {}));
+  payload.metadata=Object.assign({}, JSON.parse(JSON.stringify(src.raw_metadata || {})), payload.metadata || {});
+  // Keep every original change property and traceability reference intact.
+  payload.changes=JSON.parse(JSON.stringify(src.raw_changes || src.changes || []));
+  if(src.functional_context) payload.functional_context=contextPayload(src);
+  else if(Object.prototype.hasOwnProperty.call(payload,'functional_context') && !payload.functional_context) payload.functional_context=payload.functional_context;
+  payload.legal_questions=(src.legal_questions || []).map(legalQuestionToExport);
+  payload.legal_questions_summary=summary;
+  return payload;
 }
 
 function exportCompleteReview(){
@@ -2759,6 +3091,7 @@ function rebuildReport(){
   renderMetadata(SOURCES, combined.changes.length);
   renderSummary(SOURCES, combined.changes);
   renderChangeSummary(SOURCES);
+  renderFunctionalContext();
   renderDecisionQuestions(combined.dqEntries);
   renderLegalQuestions();
   renderFilters(combined.changes);
@@ -2772,6 +3105,7 @@ function rebuildReport(){
     groupsToolbar.classList.add('visible');
     attachFindingNoteHandlers(commentableChanges);
     attachLegalQuestionButtons();
+    attachContextJumpHandlers();
     updateFindingNotesCount(commentableChanges);
   }else{
     groupsToolbar.classList.remove('visible');
@@ -2794,7 +3128,7 @@ function renderFileChips(){
         '<span class="bloque">' + escapeHtml(src.metadata.bloque || 'sin nombre de bloque') + '</span>' +
       '</div>' +
       '<div class="actions">' +
-        '<span class="count">' + src.changes.length + ' hallazgos</span>' +
+        '<span class="count">' + src.changes.length + ' hallazgos' + (src.functional_context ? ' · contexto funcional' : '') + '</span>' +
       '</div>';
     const btn = document.createElement('button');
     btn.textContent = 'Quitar';
@@ -3279,6 +3613,8 @@ function renderChange(c, showSourceTag){
     '</div>' +
   '</div>';
 
+  html += renderContextLinksForChange(c);
+
   html += '<div class="legal-mc-action-row"><button type="button" class="legal-mc-btn new-legal-from-mc" data-source-id="' + escapeHtml(c._sourceId) + '" data-mc-id="' + escapeHtml(c.id) + '">Nueva consulta legal desde este MC</button></div>';
 
   if(c.decision_question_id){
@@ -3509,6 +3845,11 @@ document.getElementById('legal-save-btn').addEventListener('click', saveLegalQue
 document.getElementById('legal-source').addEventListener('change', syncLegalIdForSelectedSource);
 document.getElementById('export-complete-review-btn').addEventListener('click', exportCompleteReview);
 document.getElementById('export-legal-md-btn').addEventListener('click', exportLegalMarkdown);
+document.getElementById('fc-search').addEventListener('input', debounce(function(){ const src=functionalContextSource(); if(src) renderFunctionalContextSections(src); },180));
+document.getElementById('fc-add-section-btn').addEventListener('click', addFunctionalContextSection);
+document.getElementById('fc-download-md-btn').addEventListener('click', downloadFunctionalContextMarkdown);
+document.getElementById('fc-download-json-btn').addEventListener('click', downloadFunctionalContextJSON);
+
 </script>
 </body>
 </html>
