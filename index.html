@@ -721,6 +721,14 @@ details.detail-toggle summary::before{ color:var(--accent); }
 .context-meta-fields{
   display:none !important;
 }
+
+.fc-title-display{
+  font-size:1.05rem;
+  font-weight:800;
+  color:var(--ink);
+  padding:4px 0 2px;
+}
+
 </style>
 </head>
 <body>
@@ -845,7 +853,7 @@ details.detail-toggle summary::before{ color:var(--accent); }
     </section>
 
     <section class="panel" id="panel-functional-context" style="display:none;">
-      <details class="dq-panel-details">
+      <details class="dq-panel-details" data-default-collapsed="1">
         <summary class="panel-title dq-panel-summary">
           Contexto funcional
           <span class="dq-panel-count" id="fc-panel-count"></span>
@@ -897,7 +905,7 @@ details.detail-toggle summary::before{ color:var(--accent); }
     </section>
 
     <section class="panel" id="panel-legal">
-      <details class="dq-panel-details" open>
+      <details class="dq-panel-details" data-default-collapsed="1">
         <summary class="panel-title dq-panel-summary">
           Consultas para Legal
           <span class="dq-panel-count" id="legal-panel-count"></span>
@@ -2736,15 +2744,7 @@ function renderFunctionalContext(){
   if(sourceSelect) sourceSelect.addEventListener('change',function(){ACTIVE_FC_SOURCE_ID=this.value;FC_EDIT_SECTION_ID=null;renderFunctionalContext();});
 
   count.textContent=(fc.sections||[]).length ? '('+(fc.sections||[]).length+')' : '';
-  meta.innerHTML =
-    '<div class="fc-meta-field"><label>Título</label><input id="fc-title-input" value="'+escapeHtml(fc.title||'')+'"></div>'+
-    '<div class="fc-meta-field"><label>Versión</label><input id="fc-version-input" value="'+escapeHtml(fc.version||'')+'"></div>'+
-    '<div class="fc-meta-field"><label>Actualizado</label><div class="fc-meta-readonly">'+escapeHtml(fc.updated_at||'—')+'</div></div>'+
-    '<div class="fc-meta-field"><label>Fuente</label><div class="fc-meta-readonly">'+escapeHtml(fc.source||'—')+'</div></div>';
-  document.getElementById('fc-title-input').addEventListener('change',function(){fc.title=this.value;});
-  document.getElementById('fc-version-input').addEventListener('change',function(){
-    if(fc.version!==this.value){ fc.version=this.value; (fc.sections||[]).forEach(function(s){if(s.id) markContextRelatedForReview(src,s.id);}); renderFunctionalContext(); rebuildReviewGroupsOnly(); }
-  });
+  meta.innerHTML = '<div class="fc-title-display">'+escapeHtml(fc.title||'Contexto funcional')+'</div>';
 
   const used=src.metadata.functional_context_version_used;
   if(used && fc.version && String(used)!==String(fc.version)){
@@ -3104,6 +3104,16 @@ function exportLegalMarkdown(){
 /* =========================================================
    REPORT RENDERERS
    ========================================================= */
+function applyDefaultCollapsedPanels(){
+  document.querySelectorAll('details[data-default-collapsed="1"]').forEach(function(d){
+    if(d.dataset.defaultCollapseApplied !== '1'){
+      d.open = false;
+      d.removeAttribute('open');
+      d.dataset.defaultCollapseApplied = '1';
+    }
+  });
+}
+
 function rebuildReport(){
   renderFileChips();
   if(!SOURCES.length){
@@ -3124,6 +3134,7 @@ function rebuildReport(){
   renderFunctionalContext();
   renderDecisionQuestions(combined.dqEntries);
   renderLegalQuestions();
+  applyDefaultCollapsedPanels();
   renderFilters(combined.changes);
   renderReviewGroups(combined.changes);
   renderNavGroups(combined.changes);
