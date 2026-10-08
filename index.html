@@ -695,6 +695,32 @@ details.detail-toggle summary::before{ color:var(--accent); }
 @media(max-width:850px){.fc-meta-grid{grid-template-columns:1fr 1fr}.fc-edit-grid{grid-template-columns:1fr;}.fc-edit-grid .full{grid-column:auto;}}
 @media(max-width:520px){.fc-meta-grid{grid-template-columns:1fr}.fc-toolbar{align-items:stretch}.fc-toolbar-actions{width:100%}.fc-toolbar-actions button{flex:1}.fc-section-head{flex-direction:column}.fc-section-actions{width:100%}}
 
+
+.functional-context-title-only{
+  margin:8px 0 16px;
+}
+.functional-context-title-only .lbl{
+  font-size:12px;
+  font-weight:700;
+  color:var(--muted);
+  margin-bottom:6px;
+}
+.functional-context-title-text{
+  font-size:17px;
+  font-weight:800;
+  line-height:1.35;
+  color:var(--text);
+}
+
+
+#functional-context-title,
+#functional-context-version,
+#functional-context-updated-at,
+#functional-context-source,
+.functional-context-meta-fields,
+.context-meta-fields{
+  display:none !important;
+}
 </style>
 </head>
 <body>
@@ -802,7 +828,7 @@ details.detail-toggle summary::before{ color:var(--accent); }
     </section>
 
     <section class="panel" id="panel-summary">
-      <details class="dq-panel-details" open>
+      <details class="dq-panel-details">
         <summary class="panel-title dq-panel-summary">Resumen</summary>
         <div class="dq-panel-body">
           <div class="summary-grid" id="summary-grid"></div>
@@ -819,7 +845,7 @@ details.detail-toggle summary::before{ color:var(--accent); }
     </section>
 
     <section class="panel" id="panel-functional-context" style="display:none;">
-      <details class="dq-panel-details" open>
+      <details class="dq-panel-details">
         <summary class="panel-title dq-panel-summary">
           Contexto funcional
           <span class="dq-panel-count" id="fc-panel-count"></span>
@@ -2700,6 +2726,9 @@ function renderFunctionalContext(){
   let src=functionalContextSource();
   if(!src || !src.functional_context){ src=withContext[0]; ACTIVE_FC_SOURCE_ID=src.sourceId; }
   const fc=src.functional_context;
+  const fcTitleOnly = document.getElementById('functional-context-title-text');
+  if (fcTitleOnly) fcTitleOnly.textContent = (fc && fc.title) ? fc.title : 'Contexto funcional';
+
   sourceLabel.innerHTML = withContext.length>1
     ? '<label style="font-size:.75rem;margin-right:6px;">Bloque:</label><select id="fc-source-select">'+withContext.map(function(s){return '<option value="'+escapeHtml(s.sourceId)+'" '+(s.sourceId===src.sourceId?'selected':'')+'>'+escapeHtml(s.metadata.bloque||s.fileName)+'</option>';}).join('')+'</select>'
     : escapeHtml(src.metadata.bloque||src.fileName);
