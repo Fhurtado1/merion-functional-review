@@ -2302,24 +2302,24 @@ function updateFindingNotesCount(allChanges){
   const el = document.getElementById('finding-notes-count');
   if(!el) return;
 
-  // El contador debe reflejar el conjunto actualmente visible según los filtros.
-  const filteredChanges = allChanges.filter(function(c){
-    return matchesFilters(c);
+  // Contar exactamente los hallazgos que están visibles en pantalla
+  // después de aplicar todos los filtros.
+  const visibleChanges = allChanges.filter(function(c){
+    const card = document.getElementById(c._anchorId);
+    return card && !card.classList.contains('hidden-by-filter');
   });
 
   let withNotes = 0;
-  filteredChanges.forEach(function(c){
+  visibleChanges.forEach(function(c){
     const reviews = getAllFindingReviews(c._sourceLabel, c.id);
-    if(reviews.some(function(r){ return r.note && r.note.trim() !== ''; })) withNotes++;
+    const hasComment = reviews.some(function(r){
+      return !!(r.note && r.note.trim() !== '');
+    });
+    if(hasComment) withNotes++;
   });
 
-  const totalVisible = filteredChanges.length;
-
-  if(totalVisible === allChanges.length){
-    el.textContent = withNotes + ' de ' + totalVisible + ' hallazgos con comentario';
-  }else{
-    el.textContent = withNotes + ' de ' + totalVisible + ' hallazgos visibles con comentario';
-  }
+  el.textContent =
+    withNotes + ' de ' + visibleChanges.length + ' hallazgos visibles con comentario';
 }
 
 function buildSingleCommentMarkdown(c, stored){
