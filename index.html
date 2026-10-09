@@ -1552,6 +1552,9 @@ function applyFilters(){
     gEl.classList.toggle('hidden-by-filter', !anyVisible);
   });
   document.getElementById('filters-count').textContent = visibleCount + ' de ' + combined.changes.length + ' hallazgos visibles';
+
+  // Mantener sincronizado el contador de comentarios con los filtros activos.
+  updateFindingNotesCount(combined.changes);
 }
 
 function resetFilters(){
@@ -2298,12 +2301,25 @@ function reviewerBadgesHTML(reviews, type){
 function updateFindingNotesCount(allChanges){
   const el = document.getElementById('finding-notes-count');
   if(!el) return;
+
+  // El contador debe reflejar el conjunto actualmente visible según los filtros.
+  const filteredChanges = allChanges.filter(function(c){
+    return matchesFilters(c);
+  });
+
   let withNotes = 0;
-  allChanges.forEach(function(c){
+  filteredChanges.forEach(function(c){
     const reviews = getAllFindingReviews(c._sourceLabel, c.id);
     if(reviews.some(function(r){ return r.note && r.note.trim() !== ''; })) withNotes++;
   });
-  el.textContent = withNotes + ' de ' + allChanges.length + ' hallazgos con comentario';
+
+  const totalVisible = filteredChanges.length;
+
+  if(totalVisible === allChanges.length){
+    el.textContent = withNotes + ' de ' + totalVisible + ' hallazgos con comentario';
+  }else{
+    el.textContent = withNotes + ' de ' + totalVisible + ' hallazgos visibles con comentario';
+  }
 }
 
 function buildSingleCommentMarkdown(c, stored){
